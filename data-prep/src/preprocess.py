@@ -26,7 +26,8 @@ from typing import List
 import logging
 
 #NEED TO CHANGE FUNCTION NAMES
-from original_styletags import TFIDFStatsGenerator, RelativeTagsGenerator, TrainDataGen
+from style_tags import TFIDFStatsGenerator, RelativeTagsGenerator, TrainDataGeneration
+# from original_styletags import TFIDFStatsGenerator, RelativeTagsGenerator, TrainDataGen
 
 def tag_style_markers(data_path, out_path, style_0_label, style_1_label, ngram_range, tagged_lang = "tagged", threshold=0.90, ignore_from_tags=None, style_label_column=None, drop_duplicates=False, gen_tags=True):
 
@@ -59,8 +60,8 @@ def tag_style_markers(data_path, out_path, style_0_label, style_1_label, ngram_r
 
     print("GENERATING TAGGED DATA")
     #NOTE: THESE METHODS CALLED FROM OTHR FILE
-    TrainDataGen(first_style, out_path, first_tags_style, first_style, tagged_lang).generate()
-    TrainDataGen(second_style, out_path, second_tags_style, second_style, tagged_lang).generate()
+    TrainDataGeneration(first_style, out_path, first_tags_style, first_style, tagged_lang).generate()
+    TrainDataGeneration(second_style, out_path, second_tags_style, second_style, tagged_lang).generate()
 
 
 def generate_tags(first_text_class, second_text_class, first_tag_class, second_tag_class, threshold, ngram_range, ignore_from_tags=None):
