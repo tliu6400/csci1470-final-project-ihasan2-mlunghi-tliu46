@@ -45,7 +45,7 @@ class Four_Headed_Attention(tf.keras.layers.Layer):
         Q4 = tf.tensordot(inputs_for_queries, self.Q4, axes=[2, 0])
         z4 = tf.matmul(self.__attention_matrix(K4, Q4, self.use_mask), V4)
 
-        return self.w(tf.concat([z1, z2, z3], axis=2))
+        return self.w(tf.concat([z1, z2, z3, z4], axis=2))
 
     def __attention_matrix(self, K, Q, use_mask):
         window_size_queries = Q.get_shape()[1]
@@ -68,19 +68,12 @@ class Transformer_Block(tf.keras.layers.Layer):
         super(Transformer_Block, self).__init__()
 
         self.self_attention = Four_Headed_Attention(emb_sz, is_decoder)
-
         self.is_decoder = is_decoder
         if self.is_decoder:
             self.self_context_attention = Four_Headed_Attention(emb_sz, False)
-
         self.layer_norm = tf.keras.layers.LayerNormalization(axis=-1)
-
-        self.feed_forward = tf.keras.Sequential(
-            [
-                tf.keras.layers.Dense(hidden_sz, activation='relu'),
-                tf.keras.layers.Dense(emb_sz)
-            ]
-        )
+        self.dense1 = tf.keras.layers.Dense(hidden_sz, activation="relu")
+        self.dense2 = tf.keras.layers.Dense(emb_sz)
 
     @tf.function
     def call(self, inputs, context=None):
@@ -89,11 +82,12 @@ class Transformer_Block(tf.keras.layers.Layer):
         attention_normalized = self.layer_norm(attention_out)
 
         if self.is_decoder:
+            assert context is not None, "Decoder blocks require context"
             context_attention_out = self.self_context_attention(context, context, attention_normalized)
             context_attention_out += attention_normalized
             attention_normalized = self.layer_norm(context_attention_out)
 
-        feed_forward_out = self.feed_forward(attention_normalized)
+        feed_forward_out = self.dense2(self.dense1(attention_normalized))
         feed_forward_out += attention_normalized
         feed_forward_out = self.layer_norm(feed_forward_out)
 
@@ -113,47 +107,45 @@ class Transformer(tf.keras.Model):
         self.optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
 
         self.embedding_matrix = tf.Variable(tf.random.normal([self.vocab_sz, self.emb_sz], stddev=.1))
-        self.encoder = tf.keras.Sequential(
-            [
-                Transformer_Block(self.emb_sz, self.hidden_sz, False),
-                Transformer_Block(self.emb_sz, self.hidden_sz, False),
-                Transformer_Block(self.emb_sz, self.hidden_sz, False),
-                Transformer_Block(self.emb_sz, self.hidden_sz, False)
-            ]
-        )
+
+        self.encoder1 = Transformer_Block(self.emb_sz, self.hidden_sz, False)
+        self.encoder2 = Transformer_Block(self.emb_sz, self.hidden_sz, False)
+        self.encoder3 = Transformer_Block(self.emb_sz, self.hidden_sz, False)
+        self.encoder4 = Transformer_Block(self.emb_sz, self.hidden_sz, False)
+
         self.decoder1 = Transformer_Block(self.emb_sz, self.hidden_sz, True)
         self.decoder2 = Transformer_Block(self.emb_sz, self.hidden_sz, True)
         self.decoder3 = Transformer_Block(self.emb_sz, self.hidden_sz, True)
         self.decoder4 = Transformer_Block(self.emb_sz, self.hidden_sz, True)
-        # self.decoder = tf.keras.Sequential(
-        #     [
-        #         Transformer_Block(self.emb_sz, self.hidden_sz, True),
-        #         Transformer_Block(self.emb_sz, self.hidden_sz, True),
-        #         Transformer_Block(self.emb_sz, self.hidden_sz, True),
-        #         Transformer_Block(self.emb_sz, self.hidden_sz, True)
-        #     ]
-        # )
-        self.feed_forward = tf.keras.Sequential(
-            [
-                tf.keras.layers.Dense(self.hidden_sz, activation="relu"),
-                tf.keras.layers.Dense(self.hidden_sz, activation="relu"),
-                tf.keras.layers.Dense(self.vocab_sz, activation="softmax"),
-            ]
-        )
+
+        self.dense1 = tf.keras.layers.Dense(self.hidden_sz, activation="relu")
+        self.dense2 = tf.keras.layers.Dense(self.hidden_sz, activation="relu")
+        self.dense3 = tf.keras.layers.Dense(self.vocab_sz, activation="softmax")
     
     @tf.function
     def call(self, encoder_input, decoder_input):
         encoder_embedding = tf.nn.embedding_lookup(self.embedding_matrix, encoder_input)
-        encoder_output = self.encoder(encoder_embedding)
+
+        encoder1_output = self.encoder1(encoder_embedding)
+        encoder2_output = self.encoder2(encoder1_output)
+        encoder3_output = self.encoder3(encoder2_output)
+        encoder4_output = self.encoder4(encoder3_output)
+
         decoder_embedding = tf.nn.embedding_lookup(self.embedding_matrix, decoder_input)
-        decoder1_output = self.decoder1(decoder_embedding, context=encoder_output)
+
+        decoder1_output = self.decoder1(decoder_embedding, context=encoder4_output)
         decoder2_output = self.decoder2(decoder1_output, context=decoder1_output)
         decoder3_output = self.decoder3(decoder2_output, context=decoder2_output)
         decoder4_output = self.decoder4(decoder3_output, context=decoder3_output)
-        probs = self.feed_forward(decoder4_output)
+
+        dense1_output = self.dense1(decoder4_output)
+        dense2_output = self.dense2(dense1_output)
+        probs = self.dense3(dense2_output)
+
         return probs
 
     def loss(self, probs, labels, mask):
         probs = tf.boolean_mask(probs, mask)
         labels = tf.boolean_mask(labels, mask)
+
         return tf.reduce_mean(tf.keras.losses.sparse_categorical_crossentropy(labels, probs, from_logits=False))    

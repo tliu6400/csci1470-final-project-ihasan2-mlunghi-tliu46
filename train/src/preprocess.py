@@ -52,16 +52,6 @@ def get_data(inputs_file, labels_file):
     inputs = convert_to_id(vocab, inputs)
     labels = convert_to_id(vocab, labels)
 
-    # # Shuffle sentences
-    # indices = tf.range(inputs.shape[0])
-    # indices = tf.random.shuffle(indices)
-    # inputs = tf.gather(inputs, indices)
-    # labels = tf.gather(labels, indices)
+    reverse_vocab = {v: k for k, v in vocab.items()}
 
-    # # Split into test and train
-    # train_inputs = inputs[:int(inputs.shape[0]*0.8)]
-    # test_inputs = inputs[int(inputs.shape[0]*0.8):]
-    # train_labels = labels[:int(labels.shape[0]*0.8)]
-    # test_labels = labels[int(labels.shape[0]*0.8):]
-
-    return inputs, labels, vocab
+    return inputs, labels, vocab, reverse_vocab

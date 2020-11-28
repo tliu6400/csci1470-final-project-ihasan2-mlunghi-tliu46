@@ -6,6 +6,10 @@ from transformer import Transformer
 from preprocess import get_data
 
 def train(model, train_inputs, train_labels, padding_index):
+    indices = tf.range(train_labels.shape[0])
+    indices = tf.random.shuffle(indices)
+    train_inputs = tf.gather(train_inputs, indices)
+    train_labels = tf.gather(train_labels, indices)
     for i in range(0, train_labels.shape[0], model.batch_sz):
         end = min(i + model.batch_sz, train_labels.shape[0])
         with tf.GradientTape() as tape:
@@ -27,9 +31,12 @@ def main():
 
     # Preprocess
     if args.model == "TAGGER":
-        train_inputs, train_labels, vocab = get_data("../../data/entagged_parallel.train.en.catcher", "../../data/train.tagged.catcher")
+        train_inputs, train_labels, vocab, reverse_vocab = get_data("../../data/entagged_parallel.train.en.catcher", "../../data/train.tagged.catcher")
     else:
-        train_inputs, train_labels, test_inputs, test_labels, vocab = get_data("../../data/train.tagged.romeo-juliet", "../../data/entagged_parallel.train.en.romeo-juliet")
+        train_inputs, train_labels, vocab, reverse_vocab = get_data("../../data/train.tagged.romeo-juliet", "../../data/entagged_parallel.train.en.romeo-juliet")
+
+    train_inputs = tf.convert_to_tensor(train_inputs)
+    train_labels = tf.convert_to_tensor(train_labels)
 
     padding_index = vocab["*PAD*"]
 
