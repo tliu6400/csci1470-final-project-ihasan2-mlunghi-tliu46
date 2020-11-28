@@ -48,8 +48,8 @@ class TrainDataGeneration:
         #use this if file name isn't too long - ASK MATTEO
         # with open(f"{self.outpath}/en{self.target_lang}_parallel.{split}.en.{self.tag_token}", "w") as original_out,\
         #      open(f"{self.outpath}/en{self.target_lang}_parallel.{split}.{self.target_lang}.{self.tag_token}", "w") as tagged_out:
-        with open(f"{self.outpath}/en{self.target_lang}_parallel.{split}", "w") as original_out,\
-             open(f"{self.outpath}/en{self.target_lang}_parallel.{split}", "w") as tagged_out:
+        with open(f"{self.outpath}/en{self.target_lang}_parallel.{split}.en.{self.tag_token}", "w") as original_out,\
+             open(f"{self.outpath}/{split}.{self.target_lang}.{self.tag_token}", "w") as tagged_out:
 
             for original, tagged in tqdm(zip(original_sentences, tagged_sentences), total=len(tagged_sentences)):
                 if self.tag_token in tagged:
