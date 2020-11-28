@@ -1,6 +1,6 @@
 import tensorflow as tf 
 
-class Four_Headed(tf.keras.layers.Layer):
+class Four_Headed_Attention(tf.keras.layers.Layer):
 
     def __init__(self, emb_sz, use_mask):
         super(MultiHeadAttention, self).__init__()
@@ -30,23 +30,23 @@ class Four_Headed(tf.keras.layers.Layer):
 		K1 = tf.tensordot(inputs_for_keys, self.K1, axes=[2, 0])
 		V1 = tf.tensordot(inputs_for_values, self.V1, axes=[2, 0])
 		Q1 = tf.tensordot(inputs_for_queries, self.Q1, axes=[2, 0])
-		z1 = tf.matmul(Attention_Matrix(K1, Q1, self.use_mask), V1)
+		z1 = tf.matmul(self.__attention_matrix(K1, Q1, self.use_mask), V1)
 		K2 = tf.tensordot(inputs_for_keys, self.K2, axes=[2, 0])
 		V2 = tf.tensordot(inputs_for_values, self.V2, axes=[2, 0])
 		Q2 = tf.tensordot(inputs_for_queries, self.Q2, axes=[2, 0])
-		z2 = tf.matmul(Attention_Matrix(K2, Q2, self.use_mask), V2)
+		z2 = tf.matmul(self.__attention_matrix(K2, Q2, self.use_mask), V2)
 		K3 = tf.tensordot(inputs_for_keys, self.K3, axes=[2, 0])
 		V3 = tf.tensordot(inputs_for_values, self.V3, axes=[2, 0])
 		Q3 = tf.tensordot(inputs_for_queries, self.Q3, axes=[2, 0])
-		z3 = tf.matmul(Attention_Matrix(K3, Q3, self.use_mask), V3)
+		z3 = tf.matmul(self.__attention_matrix(K3, Q3, self.use_mask), V3)
         K4 = tf.tensordot(inputs_for_keys, self.K4, axes=[2, 0])
 		V4 = tf.tensordot(inputs_for_values, self.V4, axes=[2, 0])
 		Q4 = tf.tensordot(inputs_for_queries, self.Q4, axes=[2, 0])
-		z4 = tf.matmul(Attention_Matrix(K4, Q4, self.use_mask), V4)
+		z4 = tf.matmul(self.__attention_matrix(K4, Q4, self.use_mask), V4)
 
 		return self.w(tf.concat([z1, z2, z3], axis=2))
 
-    def Attention_Matrix(K, Q, use_mask):
+    def __attention_matrix(K, Q, use_mask):
         window_size_queries = Q.get_shape()[1]
         window_size_keys = K.get_shape()[1]
 
@@ -66,7 +66,7 @@ class Transformer_Block(tf.keras.layers.Layer):
 	def __init__(self, emb_sz, hidden_sz, is_decoder):
 		super(Transformer_Block, self).__init__()
 
-		self.self_attention = Four_Headed(emb_sz, is_decoder)
+		self.self_attention = Four_Headed_Attention(emb_sz, is_decoder)
 
 		self.is_decoder = is_decoder
 		if self.is_decoder:
@@ -103,11 +103,12 @@ class Transformer(tf.keras.Model):
     def __init__(self, vocab_size):
 		super(Transformer, self).__init__()
 
+		self.batch_sz = 8000
         self.num_layers = 4
         self.num_heads = 4
 		self.emb_sz = 512
         self.hidden_sz = 512
-        self.vocab_sz = vocab_size
+		self.vocab_sz = vocab_size
 		self.optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
 
 		self.embedding_matrix = tf.Variable(tf.random.normal([self.vocab_sz, self.emb_sz], stddev=.1))
@@ -143,3 +144,8 @@ class Transformer(tf.keras.Model):
 		decoder_output = self.decoder(decoder_embedding, context=encoder_output)
         probs = self.feed_forward(decoder_output)
 		return probs
+
+	def loss(self, probs, labels, mask):
+		probs = tf.boolean_mask(probs, mask)
+		labels = tf.boolean_mask(labels, mask)
+		return tf.reduce_mean(tf.keras.losses.sparse_categorical_crossentropy(labels, probs, from_logits=False))	
