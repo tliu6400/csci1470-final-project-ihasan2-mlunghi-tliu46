@@ -45,8 +45,11 @@ class TrainDataGeneration:
             original = r['txt'].strip().replace("\n", "")
             original_sentences.append(original)
             tagged_sentences.append(TrainDataGeneration.tag_sentence(original, self.tags, self.tag_token).strip().replace("\n", ""))
-        with open(f"{self.outpath}/en{self.target_lang}_parallel.{split}.en.{self.tag_token}", "w") as original_out,\
-             open(f"{self.outpath}/en{self.target_lang}_parallel.{split}.{self.target_lang}.{self.tag_token}", "w") as tagged_out:
+        #use this if file name isn't too long - ASK MATTEO
+        # with open(f"{self.outpath}/en{self.target_lang}_parallel.{split}.en.{self.tag_token}", "w") as original_out,\
+        #      open(f"{self.outpath}/en{self.target_lang}_parallel.{split}.{self.target_lang}.{self.tag_token}", "w") as tagged_out:
+        with open(f"{self.outpath}/en{self.target_lang}_parallel.{split}", "w") as original_out,\
+             open(f"{self.outpath}/en{self.target_lang}_parallel.{split}", "w") as tagged_out:
 
             for original, tagged in tqdm(zip(original_sentences, tagged_sentences), total=len(tagged_sentences)):
                 if self.tag_token in tagged:
