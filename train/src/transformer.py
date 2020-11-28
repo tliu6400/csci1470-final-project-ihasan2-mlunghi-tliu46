@@ -1,52 +1,53 @@
+import numpy as np
 import tensorflow as tf 
 
 class Four_Headed_Attention(tf.keras.layers.Layer):
 
     def __init__(self, emb_sz, use_mask):
-        super(MultiHeadAttention, self).__init__()
+        super(Four_Headed_Attention, self).__init__()
 
         self.emb_sz = emb_sz
-		self.num_heads = 4
-		self.head_dim = self.emb_sz // 4
-		self.use_mask = use_mask
+        self.num_heads = 4
+        self.head_dim = self.emb_sz // 4
+        self.use_mask = use_mask
 
-		self.K1 = self.add_weight(shape=[self.emb_sz, self.head_dim], initializer="glorot_uniform")
-		self.V1 = self.add_weight(shape=[self.emb_sz, self.head_dim], initializer="glorot_uniform")
-		self.Q1 = self.add_weight(shape=[self.emb_sz, self.head_dim], initializer="glorot_uniform")
-		self.K2 = self.add_weight(shape=[self.emb_sz, self.head_dim], initializer="glorot_uniform")
-		self.V2 = self.add_weight(shape=[self.emb_sz, self.head_dim], initializer="glorot_uniform")
-		self.Q2 = self.add_weight(shape=[self.emb_sz, self.head_dim], initializer="glorot_uniform")
-		self.K3 = self.add_weight(shape=[self.emb_sz, self.head_dim], initializer="glorot_uniform")
-		self.V3 = self.add_weight(shape=[self.emb_sz, self.head_dim], initializer="glorot_uniform")
-		self.Q3 = self.add_weight(shape=[self.emb_sz, self.head_dim], initializer="glorot_uniform")
+        self.K1 = self.add_weight(shape=[self.emb_sz, self.head_dim], initializer="glorot_uniform")
+        self.V1 = self.add_weight(shape=[self.emb_sz, self.head_dim], initializer="glorot_uniform")
+        self.Q1 = self.add_weight(shape=[self.emb_sz, self.head_dim], initializer="glorot_uniform")
+        self.K2 = self.add_weight(shape=[self.emb_sz, self.head_dim], initializer="glorot_uniform")
+        self.V2 = self.add_weight(shape=[self.emb_sz, self.head_dim], initializer="glorot_uniform")
+        self.Q2 = self.add_weight(shape=[self.emb_sz, self.head_dim], initializer="glorot_uniform")
+        self.K3 = self.add_weight(shape=[self.emb_sz, self.head_dim], initializer="glorot_uniform")
+        self.V3 = self.add_weight(shape=[self.emb_sz, self.head_dim], initializer="glorot_uniform")
+        self.Q3 = self.add_weight(shape=[self.emb_sz, self.head_dim], initializer="glorot_uniform")
         self.K4 = self.add_weight(shape=[self.emb_sz, self.head_dim], initializer="glorot_uniform")
-		self.V4 = self.add_weight(shape=[self.emb_sz, self.head_dim], initializer="glorot_uniform")
-		self.Q4 = self.add_weight(shape=[self.emb_sz, self.head_dim], initializer="glorot_uniform")
+        self.V4 = self.add_weight(shape=[self.emb_sz, self.head_dim], initializer="glorot_uniform")
+        self.Q4 = self.add_weight(shape=[self.emb_sz, self.head_dim], initializer="glorot_uniform")
 
         self.w = tf.keras.layers.Dense(self.emb_sz)
 
-	@tf.function
+    @tf.function
     def call(self, inputs_for_keys, inputs_for_values, inputs_for_queries):
-		K1 = tf.tensordot(inputs_for_keys, self.K1, axes=[2, 0])
-		V1 = tf.tensordot(inputs_for_values, self.V1, axes=[2, 0])
-		Q1 = tf.tensordot(inputs_for_queries, self.Q1, axes=[2, 0])
-		z1 = tf.matmul(self.__attention_matrix(K1, Q1, self.use_mask), V1)
-		K2 = tf.tensordot(inputs_for_keys, self.K2, axes=[2, 0])
-		V2 = tf.tensordot(inputs_for_values, self.V2, axes=[2, 0])
-		Q2 = tf.tensordot(inputs_for_queries, self.Q2, axes=[2, 0])
-		z2 = tf.matmul(self.__attention_matrix(K2, Q2, self.use_mask), V2)
-		K3 = tf.tensordot(inputs_for_keys, self.K3, axes=[2, 0])
-		V3 = tf.tensordot(inputs_for_values, self.V3, axes=[2, 0])
-		Q3 = tf.tensordot(inputs_for_queries, self.Q3, axes=[2, 0])
-		z3 = tf.matmul(self.__attention_matrix(K3, Q3, self.use_mask), V3)
+        K1 = tf.tensordot(inputs_for_keys, self.K1, axes=[2, 0])
+        V1 = tf.tensordot(inputs_for_values, self.V1, axes=[2, 0])
+        Q1 = tf.tensordot(inputs_for_queries, self.Q1, axes=[2, 0])
+        z1 = tf.matmul(self.__attention_matrix(K1, Q1, self.use_mask), V1)
+        K2 = tf.tensordot(inputs_for_keys, self.K2, axes=[2, 0])
+        V2 = tf.tensordot(inputs_for_values, self.V2, axes=[2, 0])
+        Q2 = tf.tensordot(inputs_for_queries, self.Q2, axes=[2, 0])
+        z2 = tf.matmul(self.__attention_matrix(K2, Q2, self.use_mask), V2)
+        K3 = tf.tensordot(inputs_for_keys, self.K3, axes=[2, 0])
+        V3 = tf.tensordot(inputs_for_values, self.V3, axes=[2, 0])
+        Q3 = tf.tensordot(inputs_for_queries, self.Q3, axes=[2, 0])
+        z3 = tf.matmul(self.__attention_matrix(K3, Q3, self.use_mask), V3)
         K4 = tf.tensordot(inputs_for_keys, self.K4, axes=[2, 0])
-		V4 = tf.tensordot(inputs_for_values, self.V4, axes=[2, 0])
-		Q4 = tf.tensordot(inputs_for_queries, self.Q4, axes=[2, 0])
-		z4 = tf.matmul(self.__attention_matrix(K4, Q4, self.use_mask), V4)
+        V4 = tf.tensordot(inputs_for_values, self.V4, axes=[2, 0])
+        Q4 = tf.tensordot(inputs_for_queries, self.Q4, axes=[2, 0])
+        z4 = tf.matmul(self.__attention_matrix(K4, Q4, self.use_mask), V4)
 
-		return self.w(tf.concat([z1, z2, z3], axis=2))
+        return self.w(tf.concat([z1, z2, z3], axis=2))
 
-    def __attention_matrix(K, Q, use_mask):
+    def __attention_matrix(self, K, Q, use_mask):
         window_size_queries = Q.get_shape()[1]
         window_size_keys = K.get_shape()[1]
 
@@ -63,16 +64,16 @@ class Four_Headed_Attention(tf.keras.layers.Layer):
 
 class Transformer_Block(tf.keras.layers.Layer):
 
-	def __init__(self, emb_sz, hidden_sz, is_decoder):
-		super(Transformer_Block, self).__init__()
+    def __init__(self, emb_sz, hidden_sz, is_decoder):
+        super(Transformer_Block, self).__init__()
 
-		self.self_attention = Four_Headed_Attention(emb_sz, is_decoder)
+        self.self_attention = Four_Headed_Attention(emb_sz, is_decoder)
 
-		self.is_decoder = is_decoder
-		if self.is_decoder:
-			self.self_context_attention = Multi_Headed(emb_sz, False)
+        self.is_decoder = is_decoder
+        if self.is_decoder:
+            self.self_context_attention = Four_Headed_Attention(emb_sz, False)
 
-		self.layer_norm = tf.keras.layers.LayerNormalization(axis=-1)
+        self.layer_norm = tf.keras.layers.LayerNormalization(axis=-1)
 
         self.feed_forward = tf.keras.Sequential(
             [
@@ -81,37 +82,37 @@ class Transformer_Block(tf.keras.layers.Layer):
             ]
         )
 
-	@tf.function
-	def call(self, inputs, context=None):
-		attention_out = self.self_attention(inputs, inputs, inputs)
-		attention_out += inputs
-		attention_normalized = self.layer_norm(attention_out)
+    @tf.function
+    def call(self, inputs, context=None):
+        attention_out = self.self_attention(inputs, inputs, inputs)
+        attention_out += inputs
+        attention_normalized = self.layer_norm(attention_out)
 
-		if self.is_decoder:
-			context_attention_out = self.self_context_attention(context, context, atten_normalized)
-			context_attention_out += attention_normalized
-			attention_normalized = self.layer_norm(context_attention_out)
+        if self.is_decoder:
+            context_attention_out = self.self_context_attention(context, context, attention_normalized)
+            context_attention_out += attention_normalized
+            attention_normalized = self.layer_norm(context_attention_out)
 
-		feed_forward_out = self.feed_forward(attention_normalized)
-		feed_forward_out += attention_normalized
-		feed_forward_out = self.layer_norm(feed_forward_out)
+        feed_forward_out = self.feed_forward(attention_normalized)
+        feed_forward_out += attention_normalized
+        feed_forward_out = self.layer_norm(feed_forward_out)
 
-		return tf.nn.relu(feed_forward_out)
+        return tf.nn.relu(feed_forward_out)
 
 class Transformer(tf.keras.Model):
 
     def __init__(self, vocab_size):
-		super(Transformer, self).__init__()
+        super(Transformer, self).__init__()
 
-		self.batch_sz = 8000
+        self.batch_sz = 8000
         self.num_layers = 4
         self.num_heads = 4
-		self.emb_sz = 512
+        self.emb_sz = 512
         self.hidden_sz = 512
-		self.vocab_sz = vocab_size
-		self.optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
+        self.vocab_sz = vocab_size
+        self.optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
 
-		self.embedding_matrix = tf.Variable(tf.random.normal([self.vocab_sz, self.emb_sz], stddev=.1))
+        self.embedding_matrix = tf.Variable(tf.random.normal([self.vocab_sz, self.emb_sz], stddev=.1))
         self.encoder = tf.keras.Sequential(
             [
                 Transformer_Block(self.emb_sz, self.hidden_sz, False),
@@ -120,14 +121,18 @@ class Transformer(tf.keras.Model):
                 Transformer_Block(self.emb_sz, self.hidden_sz, False)
             ]
         )
-        self.decoder = tf.keras.Sequential(
-            [
-                Transformer_Block(self.emb_sz, self.hidden_sz, True)
-                Transformer_Block(self.emb_sz, self.hidden_sz, True)
-                Transformer_Block(self.emb_sz, self.hidden_sz, True)
-                Transformer_Block(self.emb_sz, self.hidden_sz, True)
-            ]
-        )
+        self.decoder1 = Transformer_Block(self.emb_sz, self.hidden_sz, True)
+        self.decoder2 = Transformer_Block(self.emb_sz, self.hidden_sz, True)
+        self.decoder3 = Transformer_Block(self.emb_sz, self.hidden_sz, True)
+        self.decoder4 = Transformer_Block(self.emb_sz, self.hidden_sz, True)
+        # self.decoder = tf.keras.Sequential(
+        #     [
+        #         Transformer_Block(self.emb_sz, self.hidden_sz, True),
+        #         Transformer_Block(self.emb_sz, self.hidden_sz, True),
+        #         Transformer_Block(self.emb_sz, self.hidden_sz, True),
+        #         Transformer_Block(self.emb_sz, self.hidden_sz, True)
+        #     ]
+        # )
         self.feed_forward = tf.keras.Sequential(
             [
                 tf.keras.layers.Dense(self.hidden_sz, activation="relu"),
@@ -135,17 +140,20 @@ class Transformer(tf.keras.Model):
                 tf.keras.layers.Dense(self.vocab_sz, activation="softmax"),
             ]
         )
-	
-	@tf.function
-	def call(self, encoder_input, decoder_input):
-		encoder_embedding = tf.nn.embedding_lookup(self.embedding_matrix, encoder_input)
-		encoder_output = self.encoder(encoder_embedding)
+    
+    @tf.function
+    def call(self, encoder_input, decoder_input):
+        encoder_embedding = tf.nn.embedding_lookup(self.embedding_matrix, encoder_input)
+        encoder_output = self.encoder(encoder_embedding)
         decoder_embedding = tf.nn.embedding_lookup(self.embedding_matrix, decoder_input)
-		decoder_output = self.decoder(decoder_embedding, context=encoder_output)
-        probs = self.feed_forward(decoder_output)
-		return probs
+        decoder1_output = self.decoder1(decoder_embedding, context=encoder_output)
+        decoder2_output = self.decoder2(decoder1_output, context=decoder1_output)
+        decoder3_output = self.decoder3(decoder2_output, context=decoder2_output)
+        decoder4_output = self.decoder4(decoder3_output, context=decoder3_output)
+        probs = self.feed_forward(decoder4_output)
+        return probs
 
-	def loss(self, probs, labels, mask):
-		probs = tf.boolean_mask(probs, mask)
-		labels = tf.boolean_mask(labels, mask)
-		return tf.reduce_mean(tf.keras.losses.sparse_categorical_crossentropy(labels, probs, from_logits=False))	
+    def loss(self, probs, labels, mask):
+        probs = tf.boolean_mask(probs, mask)
+        labels = tf.boolean_mask(labels, mask)
+        return tf.reduce_mean(tf.keras.losses.sparse_categorical_crossentropy(labels, probs, from_logits=False))    

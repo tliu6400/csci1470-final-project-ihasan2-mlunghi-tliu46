@@ -6,13 +6,13 @@ from transformer import Transformer
 from preprocess import get_data
 
 def train(model, train_inputs, train_labels, padding_index):
-    for i in range(0, train_inputs.shape[0], model.batch_sz):
-		end = min(i + model.batch_size, train_english.shape[0])
-		with tf.GradientTape() as tape:
-			probs = model.call(train_inputs[i:end], train_labels[i:end, :-1])
-			loss = model.loss_function(probs, train_labels[i:end, 1:], train_labels[i:end, 1:] != padding_index)
-		gradients = tape.gradient(loss, model.trainable_variables)
-		model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+    for i in range(0, train_labels.shape[0], model.batch_sz):
+        end = min(i + model.batch_sz, train_labels.shape[0])
+        with tf.GradientTape() as tape:
+            probs = model.call(train_inputs[i:end], train_labels[i:end, :-1])
+            loss = model.loss(probs, train_labels[i:end, 1:], train_labels[i:end, 1:] != padding_index)
+        gradients = tape.gradient(loss, model.trainable_variables)
+        model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
 
 def main():
     parser = argparse.ArgumentParser("Train model")
@@ -27,9 +27,9 @@ def main():
 
     # Preprocess
     if args.model == "TAGGER":
-        train_inputs, train_labels, test_inputs, test_labels, vocab = get_data("???")
+        train_inputs, train_labels, vocab = get_data("../../data/entagged_parallel.train.en.catcher", "../../data/train.tagged.catcher")
     else:
-        train_inputs, train_labels, test_inputs, test_labels, vocab = get_data("???")
+        train_inputs, train_labels, test_inputs, test_labels, vocab = get_data("../../data/train.tagged.romeo-juliet", "../../data/entagged_parallel.train.en.romeo-juliet")
 
     padding_index = vocab["*PAD*"]
 
