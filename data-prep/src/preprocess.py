@@ -65,7 +65,6 @@ def tag_style_markers(data_path, out_path, style_0_label, style_1_label, ngram_r
 
 
 
-
 def generate_tags(first_text_class, second_text_class, first_tag_class, second_tag_class, threshold, ngram_range, ignore_from_tags=None):
     #print(first_text_class)
     #print(first_tag_class)
@@ -80,13 +79,13 @@ def generate_tags(first_text_class, second_text_class, first_tag_class, second_t
     tags_class_two = RelativeTagsGenerator(main_class_stats=stats_class_two, relative_class_stats=stats_class_one, thresh=threshold).tags
     return tags_class_one, tags_class_two
 
-def prepare_tagger(out_directory, first_style_label, second_style_label, is_unimodal):
-    subprocess.check_call(f"scripts/prep_tagger.sh {out_directory} {out_directory} tagged {int(is_unimodal)} {first_style_label} {second_style_label}",
-                          shell=True)
-
-def prepare_generate(out_directory, first_style_label, second_style_label, is_unimodal):
-     subprocess.check_call(f"scripts/prep_generator.sh {out_directory} {out_directory} tagged generated {int(is_unimodal)} {first_style_label} {second_style_label}",
-                          shell=True)
+# def prepare_tagger(out_directory, first_style_label, second_style_label, is_unimodal):
+#     subprocess.check_call(f"scripts/prep_tagger.sh {out_directory} {out_directory} tagged {int(is_unimodal)} {first_style_label} {second_style_label}",
+#                           shell=True)
+#
+# def prepare_generate(out_directory, first_style_label, second_style_label, is_unimodal):
+#      subprocess.check_call(f"scripts/prep_generator.sh {out_directory} {out_directory} tagged generated {int(is_unimodal)} {first_style_label} {second_style_label}",
+#                           shell=True)
 
 
 if __name__ == '__main__':
@@ -100,9 +99,10 @@ if __name__ == '__main__':
 
 
     #generate tagger parallel dataset
-    prepare_tagger(args["--outpath"], args["--first_style_label"], args["--second_style_label"], is_unimodal)
+    #prepare_tagger(args["--outpath"], args["--first_style_label"], args["--second_style_label"], is_unimodal)
+
 
     #generate generator parallel dataset
-    prepare_parallel_data_generator(args["--outpath"], args["--first_style_label"], args["--second_style_label"], is_unimodal)
+    #prepare_parallel_data_generator(args["--outpath"], args["--first_style_label"], args["--second_style_label"], is_unimodal)
 
     print("PARALLELIZING DONE")
