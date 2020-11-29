@@ -50,7 +50,12 @@ def tag_style_markers(data_path, out_path, style_0_label, style_1_label, ngram_r
             second_tags_style = json.load(f)
     else:
         print("COMPUTING TF/IDF STATS")
-        first_tags_style, second_tags_style = generate_tags(first_text_class=first_style[first_style["split"] != "test"]["txt"],second_text_class=second_style[second_style["split"] != "test"]["txt"], first_tag_class=style_0_label, second_tag_class=style_1_label, ignore_from_tags=None, threshold=threshold, ngram_range=ngram_range)
+        first_tags_style, second_tags_style = generate_tags(first_text_class=first_style[first_style["split"] != "test"]["txt"],
+                                                            second_text_class=second_style[second_style["split"] != "test"]["txt"], 
+                                                            first_tag_class=style_0_label, second_tag_class=style_1_label, 
+                                                            ignore_from_tags=None, 
+                                                            threshold=threshold, 
+                                                            ngram_range=ngram_range)
 
         print("LOADING JSON TAGS")
         with open(f"{out_path}/{style_0_label}_tags.json", "w") as f:
@@ -94,7 +99,7 @@ if __name__ == '__main__':
     args = docopt(__doc__, version="")
     is_unimodal = int(args["--is_unimodal"] == True)
 
-    #generate taggs
+    #generate tags
     tag_style_markers(data_path=args["--data_path"], out_path=args["--outpath"], style_0_label=args["--first_style_label"], style_1_label=args["--second_style_label"], threshold=float(args["--threshold"]), ngram_range=(int(args["--ngram_min"]), int(args["--ngram_max"])), style_label_column=args["--style_label_column"])
 
 
