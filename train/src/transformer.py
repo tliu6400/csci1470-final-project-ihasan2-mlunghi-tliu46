@@ -134,9 +134,9 @@ class Transformer(tf.keras.Model):
         decoder_embedding = tf.nn.embedding_lookup(self.embedding_matrix, decoder_input)
 
         decoder1_output = self.decoder1(decoder_embedding, context=encoder4_output)
-        decoder2_output = self.decoder2(decoder1_output, context=decoder1_output)
-        decoder3_output = self.decoder3(decoder2_output, context=decoder2_output)
-        decoder4_output = self.decoder4(decoder3_output, context=decoder3_output)
+        decoder2_output = self.decoder2(decoder1_output, context=encoder4_output)
+        decoder3_output = self.decoder3(decoder2_output, context=encoder4_output)
+        decoder4_output = self.decoder4(decoder3_output, context=encoder4_output)
 
         dense1_output = self.dense1(decoder4_output)
         dense2_output = self.dense2(dense1_output)
