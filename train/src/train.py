@@ -18,40 +18,10 @@ def train(model, train_inputs, train_labels, padding_index, r_v):
         end = min(i + model.batch_sz, train_labels.shape[0])
         with tf.GradientTape() as tape:
             # call model on a batch of inputs
-            probs = model.call(train_inputs[i:end], train_labels[i:end, :-1])
-
-            # Trying to see what max probs the model gave us
-            if i == 0:
-                # check an output sentence
-
-
-                converted_sentence = tf.math.argmax(probs[0,:,:], 1)
-                # print("converted sentence is: ", converted_sentence)
-
-                # print("original sentence is, ", train_inputs[0,:])
-
-                original_sentence = train_inputs[0]
-                print("\n\n\n original sentence is ", [r_v[original_sentence[i].numpy()] for i in range(len(original_sentence))])
-                # print("original sentence in word form ", [r_v[train_inputs[0,:][i]] for i in range(len(train_inputs[0,:])])
-
-                # print("was meant to tag as , ", train_labels[0,:])
-                lab = train_labels[0]
-                print("\n\n\ntagged sentence is ", [r_v[lab[i].numpy()] for i in range(len(lab))])
-
-                print("\n\n\n but what we actually got is ", [r_v[converted_sentence[i].numpy()] for i in range(len(converted_sentence)) ])
-
-
-                # print("AND THE WORD IS ", r_v[tf.math.argmax(probs[0,:,:],1)[0].numpy()])
-                # print("just to be clear the word i printed is ", tf.math.argmax(probs[0,:,:], 1)[0])
-
-                # print("what the hell is 2 ",  r_v[2])
-                
-
-
-
-
+            probs = model.call(train_inputs[i:end], train_labels[i:end, :-1])                
             # calculate loss on a batch of inputs using 
             loss = model.loss(probs, train_labels[i:end, 1:], train_labels[i:end, 1:] != padding_index)
+            print(loss)
         gradients = tape.gradient(loss, model.trainable_variables)
         model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
 
@@ -72,10 +42,6 @@ def main():
     else:
         train_inputs, train_labels, vocab, reverse_vocab = get_data("../../data/train.tagged.romeo-juliet", "../../data/entagged_parallel.train.en.romeo-juliet")
 
-
-    # print(train_inputs[0:10])
-    # print(train_labels[0:10])
-
     train_inputs = tf.convert_to_tensor(train_inputs)
     train_labels = tf.convert_to_tensor(train_labels)
 
@@ -88,9 +54,14 @@ def main():
         model = Transformer(len(vocab))
 
     # Train model
-    for i in range(1, 2):
+    for i in range(1, 500):
         print("Epoch {}".format(i))
         train(model, train_inputs, train_labels, padding_index, reverse_vocab)
+    print("Input sentence is ", [reverse_vocab[train_inputs[0, i].numpy()] for i in range(len(train_inputs[0]))])
+    print("Label sentence is ", [reverse_vocab[train_labels[0, i].numpy()] for i in range(len(train_labels[0]))])
+    probs = model.call(tf.expand_dims(train_inputs[0], axis=0), tf.expand_dims(train_labels[0, :-1], axis=0))
+    output_sentence = tf.math.argmax(probs[0,:,:], axis=1)
+    print("Output sentence is ", [reverse_vocab[output_sentence[i].numpy()] for i in range((output_sentence.shape[0]))])
 
     # Save model
     if args.save is not None:
