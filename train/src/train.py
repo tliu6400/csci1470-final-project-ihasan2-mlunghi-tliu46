@@ -38,9 +38,9 @@ def main():
 
     # Preprocess
     if args.model == "TAGGER":
-        train_inputs, train_labels, test_inputs, test_labels, vocab, reverse_vocab = get_data("../../data/entagged_parallel.train.en.catcher", "../../data/train.tagged.catcher", "../../data/entagged_parallel.test.en.catcher", "../../data/test.tagged.catcher")
+        train_inputs, train_labels, test_inputs, test_labels, vocab, reverse_vocab = get_data("../../data/entagged_parallel.train.en.P_0", "../../data/train.tagged.P_0", "../../data/entagged_parallel.test.en.P_0", "../../data/test.tagged.P_0")
     else:
-        train_inputs, train_labels, test_inputs, test_labels, vocab, reverse_vocab = get_data("../../data/train.tagged.romeo-juliet", "../../data/entagged_parallel.train.en.romeo-juliet", "../../data/entagged_parallel.test.en.romeo-juliet", "../../data/test.tagged.romeo-juliet")
+        train_inputs, train_labels, test_inputs, test_labels, vocab, reverse_vocab = get_data("../../data/train.tagged.P_9", "../../data/entagged_parallel.train.en.P_9", "../../data/entagged_parallel.test.en.P_9", "../../data/test.tagged.P_9")
 
     train_inputs = tf.convert_to_tensor(train_inputs)
     train_labels = tf.convert_to_tensor(train_labels)
@@ -56,15 +56,15 @@ def main():
         model = Transformer(len(vocab))
 
     # Train model
-    for i in range(1, 250):
+    for i in range(1, 10):
         print("Epoch {}".format(i))
         train(model, train_inputs, train_labels, padding_index, reverse_vocab)
 
-    print("Input sentence is ", [reverse_vocab[test_inputs[1, i].numpy()] for i in range(len(test_inputs[0]))])
-    print("Label sentence is ", [reverse_vocab[test_labels[1, i].numpy()] for i in range(len(test_labels[0]))])
+    print("\nInput sentence is \n", [reverse_vocab[test_inputs[1, i].numpy()] for i in range(len(test_inputs[0]))])
+    print("\nLabel sentence is \n", [reverse_vocab[test_labels[1, i].numpy()] for i in range(len(test_labels[0]))])
     probs = model.call(tf.expand_dims(test_inputs[1], axis=0), tf.expand_dims(test_labels[1, :-1], axis=0))
     output_sentence = tf.math.argmax(probs[0,:,:], axis=1)
-    print("Output sentence is ", [reverse_vocab[output_sentence[i].numpy()] for i in range((output_sentence.shape[0]))])
+    print("\nOutput sentence is \n", [reverse_vocab[output_sentence[i].numpy()] for i in range((output_sentence.shape[0]))])
 
     # Save model
     if args.save is not None:
