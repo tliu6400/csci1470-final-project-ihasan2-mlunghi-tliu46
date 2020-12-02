@@ -109,13 +109,13 @@ class Transformer(tf.keras.Model):
     def __init__(self, vocab_size):
         super(Transformer, self).__init__()
 
-        self.batch_sz = 100
+        self.batch_sz = 640
         # self.batch_sz = 8000
         self.num_layers = 4
         self.num_heads = 4
         self.emb_sz = 64
-        self.hidden_sz = 64        
         # self.emb_sz = 512
+        self.hidden_sz = 64        
         # self.hidden_sz = 512
         self.vocab_sz = vocab_size
         self.optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)

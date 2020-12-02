@@ -7,20 +7,28 @@ from preprocess import get_data
 
 def train(model, train_inputs, train_labels, padding_index, r_v):
     # shuffle the indices of the input sentences
-    indices = tf.range(train_labels.shape[0])
-    indices = tf.random.shuffle(indices)
-    train_inputs = tf.gather(train_inputs, indices)
-    train_labels = tf.gather(train_labels, indices)
+    # indices = tf.range(train_labels.shape[0])
+    # indices = tf.random.shuffle(indices)
+    # train_inputs = tf.gather(train_inputs, indices)
+    # train_labels = tf.gather(train_labels, indices)
 
-    # run batches of the data
-    for i in range(0, train_labels.shape[0], model.batch_sz):
-        # define an end in case we are on last batch
-        end = min(i + model.batch_sz, train_labels.shape[0])
+    # # run batches of the data
+    # for i in range(0, train_labels.shape[0], model.batch_sz):
+    #     # define an end in case we are on last batch
+    #     end = min(i + model.batch_sz, train_labels.shape[0])
+    #     with tf.GradientTape() as tape:
+    #         # call model on a batch of inputs
+    #         probs = model.call(train_inputs[i:end], train_labels[i:end, :-1])                
+    #         # calculate loss on a batch of inputs using 
+    #         loss = model.loss(probs, train_labels[i:end, 1:], train_labels[i:end, 1:] != padding_index)
+    #         print(loss)
+    #     gradients = tape.gradient(loss, model.trainable_variables)
+    #     model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+
+    for inputs_batch, labels_batch in zip(train_inputs, train_labels):
         with tf.GradientTape() as tape:
-            # call model on a batch of inputs
-            probs = model.call(train_inputs[i:end], train_labels[i:end, :-1])                
-            # calculate loss on a batch of inputs using 
-            loss = model.loss(probs, train_labels[i:end, 1:], train_labels[i:end, 1:] != padding_index)
+            probs = model.call(inputs_batch, labels_batch[:, :-1])                
+            loss = model.loss(probs, labels_batch[:, 1:], labels_batch[:, 1:] != padding_index)
             print(loss)
         gradients = tape.gradient(loss, model.trainable_variables)
         model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
@@ -42,10 +50,10 @@ def main():
     else:
         train_inputs, train_labels, test_inputs, test_labels, vocab, reverse_vocab = get_data("../../data/train.tagged.P_9", "../../data/entagged_parallel.train.en.P_9", "../../data/entagged_parallel.test.en.P_9", "../../data/test.tagged.P_9")
 
-    train_inputs = tf.convert_to_tensor(train_inputs)
-    train_labels = tf.convert_to_tensor(train_labels)
-    test_inputs = tf.convert_to_tensor(test_inputs)
-    test_labels = tf.convert_to_tensor(test_labels)
+    # train_inputs = tf.convert_to_tensor(train_inputs)
+    # train_labels = tf.convert_to_tensor(train_labels)
+    # test_inputs = tf.convert_to_tensor(test_inputs)
+    # test_labels = tf.convert_to_tensor(test_labels)
 
     padding_index = vocab["*PAD*"]
 
