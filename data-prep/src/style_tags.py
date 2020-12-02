@@ -1,5 +1,5 @@
 """
-Generates tags for training the tagger
+Does the Heavy Lifting to create tagged sentences with
 """
 
 import pandas as pd
@@ -16,7 +16,6 @@ import logging
 
 tqdm.pandas()
 
-tfidf_stats = namedtuple("tfidf_stats", ['data_id', 'id_to_word', 'word_to_id', 'tfidf_avg', 'word_to_idf', 'counts'])
 
 class TrainDataGeneration:
     """
@@ -62,28 +61,6 @@ class TrainDataGeneration:
         self.tag_and_dump(split='train')
         self.tag_and_dump(split='test')
         self.tag_and_dump(split='val')
-
-
-    def tag_and_dump_batched(self, split):
-        """Iterate over the given split, tags the sentences and write out the data
-
-        Arguments:
-            split {[str]} -- [description]
-        """
-        original_sentences, tagged_sentences = [], []
-        self.data["txt_tagged"] = self.data["txt"].progress_apply(lambda x: \
-                                                                  TrainDataGen.tag_sentence(original, self.tags,\
-                                                                                             self.tag_token).strip().replace("\n", ""))
-
-
-        with open(f"{self.outpath}/en{self.target_lang}_parallel.{split}.en.{self.tag_token}]", "w") as orig_out,\
-             open(f"{self.outpath}/en{self.target_lang}_parallel.{split}.{self.target_lang}.{self.tag_token}]", "w") as tagged_out:
-            for original, tagged in tqdm(zip(original_sentences, tagged_sentences), total=len(tagged_sentences)):
-                if self.tag_token in tagged:
-                    ### ONLY WRITE OUT THE tagED DATA
-                    original_out.write(f"{original.strip()}\n")
-                    tagged_out.write(f"{tagged.strip()}\n")
-
 
 
 
@@ -150,6 +127,10 @@ class TFIDFStatsGenerator:
         self.ngram_range = ngram_range
         self.data_id = data_id
         self.data = data
+
+        # print(self.data)
+
+
         self.generate()
 
     def get_word_counts(self):
@@ -166,6 +147,8 @@ class TFIDFStatsGenerator:
         word_count = {}
         for w in word_to_id:
             word_count[w] = X[0, word_to_id[w]]
+
+        # print(word_count)
         return word_count
 
 
@@ -179,7 +162,13 @@ class TFIDFStatsGenerator:
         logging.info("Running TfidfVectorizer")
         vectorizer = TfidfVectorizer(ngram_range=self.ngram_range)
         X = vectorizer.fit_transform(self.data)
+
+        # print(X)
         feature_names = vectorizer.get_feature_names()
+
+
+
+
         id_to_word = {i: feature_names[i] for i in range(len(vectorizer.get_feature_names()))}
         word_to_id = {v: k for k, v in id_to_word.items()}
         X = np.asarray(X.mean(axis=0)).squeeze(0) # / num_docs
@@ -187,6 +176,10 @@ class TFIDFStatsGenerator:
         idf = vectorizer.idf_
         counts = self.get_word_counts()
         word_to_idf = dict(zip(feature_names, idf))
+
+
+
+
 
         self.id_to_word = id_to_word
         self.word_to_id = word_to_id
@@ -234,6 +227,9 @@ class RelativeTagsGenerator:
             class2_tfidf_report {[TFIDFStats]} -- [TFIDFStats for class2]
         """
         report = []
+
+        # print("\n\n\n ", self.main_class_stats.word_to_id.keys(), " PENISSSS")
+
         for word in self.main_class_stats.word_to_id.keys():
             if self.main_class_stats.counts[word] >= self.min_freq and word in self.relative_class_stats.word_to_id:
                     res = {}

@@ -42,6 +42,11 @@ def tag_style_markers(data_path, out_path, style_0_label, style_1_label, ngram_r
     first_style = data[data[style_label_column] == style_0_label]
     second_style = data[data[style_label_column] == style_1_label]
 
+
+    # print("\n\n\n ", first_style, " PENISSSS")
+
+
+
     if not gen_tags:
         print("LOADING JSON TAGS")
         with open(f"{out_path}/{style_0_label}_tags.json", "r") as f:
@@ -71,13 +76,9 @@ def tag_style_markers(data_path, out_path, style_0_label, style_1_label, ngram_r
 
 
 def generate_tags(first_text_class, second_text_class, first_tag_class, second_tag_class, threshold, ngram_range, ignore_from_tags=None):
-    #print(first_text_class)
-    #print(first_tag_class)
-    #print(ngram_range)
+
     stats_class_one = TFIDFStatsGenerator(data=first_text_class, data_id=first_tag_class, ngram_range=ngram_range)
-    #print(second_text_class)
-    #print(second_tag_class)
-    #print(ngram_range)
+
     stats_class_two = TFIDFStatsGenerator(data=second_text_class, data_id=second_tag_class, ngram_range=ngram_range)
 
     tags_class_one = RelativeTagsGenerator(main_class_stats=stats_class_one, relative_class_stats=stats_class_two, ignore_from_tags=ignore_from_tags, thresh=threshold).tags
@@ -94,6 +95,8 @@ def generate_tags(first_text_class, second_text_class, first_tag_class, second_t
 
 
 if __name__ == '__main__':
+
+    
     print("PREPROCESSING STARTED")
 
     args = docopt(__doc__, version="")
