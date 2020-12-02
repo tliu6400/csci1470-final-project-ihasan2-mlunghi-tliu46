@@ -61,21 +61,21 @@ def get_data(train_inputs_file, train_labels_file, test_inputs_file, test_labels
 
     reverse_vocab = {v: k for k, v in vocab.items()}
 
-    train_inputs = tf.data.Dataset.from_tensors(train_inputs)
-    train_labels = tf.data.Dataset.from_tensors(train_labels)
-    test_inputs = tf.data.Dataset.from_tensors(test_inputs)
-    test_labels = tf.data.Dataset.from_tensors(test_labels)
+    train_inputs = tf.data.Dataset.from_tensor_slices(train_inputs)
+    train_labels = tf.data.Dataset.from_tensor_slices(train_labels)
+    test_inputs = tf.data.Dataset.from_tensor_slices(test_inputs)
+    test_labels = tf.data.Dataset.from_tensor_slices(test_labels)
 
     train_inputs = train_inputs.batch(640)
-    train_inputs = train_inputs.prefetch(1)
+    train_inputs = train_inputs.prefetch(640)
 
     train_labels = train_labels.batch(640)
-    train_labels = train_labels.prefetch(1)
+    train_labels = train_labels.prefetch(640)
 
     test_inputs = test_inputs.batch(640)
-    test_inputs = test_inputs.prefetch(1)
+    test_inputs = test_inputs.prefetch(640)
 
     test_labels = test_labels.batch(640)
-    test_labels = test_labels.prefetch(1)
+    test_labels = test_labels.prefetch(640)
 
     return train_inputs, train_labels, test_inputs, test_labels, vocab, reverse_vocab
