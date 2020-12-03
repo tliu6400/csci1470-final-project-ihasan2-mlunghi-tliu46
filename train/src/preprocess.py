@@ -23,16 +23,16 @@ def build_vocab(train_input_sentences, train_labels_sentences, test_input_senten
     return vocab
 
 def pad_corpus(input_sentences, labels_sentences):
-    max_length = max([len(s) for s in input_sentences] + [len(s) for s in labels_sentences]) + 1
+    max_length = min(50, max([len(s) for s in input_sentences] + [len(s) for s in labels_sentences]) + 1)
     input_padded_sentences = []
     for s in input_sentences:
         padded_input = s[:max_length]
-        padded_input += [stop_token] + [pad_token] * (max_length - len(padded_input) - 1)
+        padded_input += [stop_token] + [pad_token] * (max_length - len(padded_input))
         input_padded_sentences.append(padded_input)
     labels_padded_sentences = []
     for s in labels_sentences:
         padded_label = s[:max_length]
-        padded_label = [start_token] + padded_label + [stop_token] + [pad_token] * (max_length - len(padded_label) - 1)
+        padded_label = [start_token] + padded_label + [stop_token] + [pad_token] * (max_length - len(padded_label))
         labels_padded_sentences.append(padded_label)
     return input_padded_sentences, labels_padded_sentences
 
@@ -49,7 +49,7 @@ def get_data(train_inputs_file, train_labels_file, test_inputs_file, test_labels
     # Pad sentences
     train_inputs, train_labels = pad_corpus(train_inputs, train_labels)
     test_inputs, test_labels = pad_corpus(test_inputs, test_labels)
-
+    
     # Build vocab
     vocab = build_vocab(train_inputs, train_labels, test_inputs, test_labels)
 
