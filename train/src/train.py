@@ -29,9 +29,15 @@ def train(model, train_inputs, train_labels, padding_index, r_v):
         with tf.GradientTape() as tape:
             probs = model.call(inputs_batch, labels_batch[:, :-1])                
             loss = model.loss(probs, labels_batch[:, 1:], labels_batch[:, 1:] != padding_index)
-            print(loss)
+            print("Train Loss {}".format(loss.numpy()))
         gradients = tape.gradient(loss, model.trainable_variables)
         model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+
+def test(model, test_inputs, test_labels, padding_index, r_v):
+    for inputs_batch, labels_batch in zip(test_inputs, test_labels):
+        probs = model.call(inputs_batch, labels_batch[:, :-1]) 
+        loss = model.loss(probs, labels_batch[:, 1:], labels_batch[:, 1:] != padding_index)
+        print("Test Loss {}".format(loss.numpy()))
 
 def main():
     parser = argparse.ArgumentParser("Train model")
@@ -65,8 +71,11 @@ def main():
 
     # Train model
     for i in range(1, 10):
-        print("Epoch {}".format(i))
+        print("Starting training epoch {}".format(i))
         train(model, train_inputs, train_labels, padding_index, reverse_vocab)
+        if i % 2 == 0:
+            print("Evaluating after training epoch {}".format(i))
+            train(model, test_inputs, test_labels, padding_index, reverse_vocab)
 
     print("\nInput sentence is \n", [reverse_vocab[test_inputs[1, i].numpy()] for i in range(len(test_inputs[0]))])
     print("\nLabel sentence is \n", [reverse_vocab[test_labels[1, i].numpy()] for i in range(len(test_labels[0]))])
