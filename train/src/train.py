@@ -80,12 +80,12 @@ def main():
     else:
         model = Transformer(len(vocab))
 
-    # # Train model
-    # for i in range(1, 10):
-    #     print("----------Starting training epoch {}----------".format(i))
-    #     train(model, train_inputs, train_labels, padding_index)
-
-    # Sample model
+     # Train model
+    for i in range(1, 10):
+        print("----------Starting training epoch {}----------".format(i))
+        train(model, train_inputs, train_labels, padding_index)
+        test(mode, test_inputs, test_labels, padding_index)
+# Sample model
     idx = random.choice(range(len(test_inputs)))
     print("Input sentence: {}".format([reverse_vocab[test_inputs[idx, i]] for i in range(len(test_inputs[idx]))]))
     print("Label sentence: {}".format([reverse_vocab[test_labels[idx, i]] for i in range(len(test_labels[idx]))]))
