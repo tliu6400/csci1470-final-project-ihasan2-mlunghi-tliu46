@@ -128,8 +128,8 @@ class Transformer(tf.keras.Model):
         self.vocab_sz = len(vocab)
 
         self.embedding_matrix = tf.Variable(tf.random.normal([self.vocab_sz, self.emb_sz], stddev=.1))
-        self.positional_encoding_encoder = Position_Encoding_Layer(32, self.emb_sz)
-        self.positional_encoding_decoder = Position_Encoding_Layer(32, self.emb_sz)
+        self.positional_encoding_encoder = Position_Encoding_Layer(33, self.emb_sz)
+        self.positional_encoding_decoder = Position_Encoding_Layer(33, self.emb_sz)
         self.encoder1 = Transformer_Block(self.emb_sz, self.hidden_sz, False)
         self.encoder2 = Transformer_Block(self.emb_sz, self.hidden_sz, False)
         self.encoder3 = Transformer_Block(self.emb_sz, self.hidden_sz, False)
@@ -146,6 +146,8 @@ class Transformer(tf.keras.Model):
 
     @tf.function
     def call(self, encoder_input, decoder_input):
+        print(encoder_input.shape)
+        print(decoder_input.shape)
         encoder_embedding = tf.nn.embedding_lookup(self.embedding_matrix, encoder_input)
         encoder_embedding = self.positional_encoding_encoder(encoder_embedding)
 
