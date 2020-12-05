@@ -84,6 +84,7 @@ def main():
     for i in range(1, 10):
         print("----------Starting training epoch {}----------".format(i))
         train(model, train_inputs, train_labels, padding_index)
+        test(mode, test_inputs, test_labels, padding_index)
 
     # Sample model
     idx = random.choice(range(len(test_inputs)))
