@@ -123,14 +123,13 @@ class Transformer(tf.keras.Model):
         self.emb_sz = 512
         self.hidden_sz = 512
         self.vocab = vocab
-        self.reverse_vocab
+        self.reverse_vocab = reverse_vocab
         self.optimizer = tf.keras.optimizers.Adam(learning_rate=5e-5)
+        self.vocab_sz = len(vocab)
 
         self.embedding_matrix = tf.Variable(tf.random.normal([self.vocab_sz, self.emb_sz], stddev=.1))
-        
-        self.positional_encoding_encoder = transformer.Position_Encoding_Layer(32, self.emb_sz)
-		self.positional_encoding_decoder = transformer.Position_Encoding_Layer(32, self.emb_sz)
-        
+        self.positional_encoding_encoder = Position_Encoding_Layer(32, self.emb_sz)
+        self.positional_encoding_decoder = Position_Encoding_Layer(32, self.emb_sz)
         self.encoder1 = Transformer_Block(self.emb_sz, self.hidden_sz, False)
         self.encoder2 = Transformer_Block(self.emb_sz, self.hidden_sz, False)
         self.encoder3 = Transformer_Block(self.emb_sz, self.hidden_sz, False)
@@ -148,7 +147,7 @@ class Transformer(tf.keras.Model):
     @tf.function
     def call(self, encoder_input, decoder_input):
         encoder_embedding = tf.nn.embedding_lookup(self.embedding_matrix, encoder_input)
-        encoder_embedding = tf.positional_encoding_encoder(encoder_embedding)
+        encoder_embedding = self.positional_encoding_encoder(encoder_embedding)
 
         encoder1_output = self.encoder1(encoder_embedding)
         encoder2_output = self.encoder2(encoder1_output)
@@ -156,7 +155,7 @@ class Transformer(tf.keras.Model):
         encoder4_output = self.encoder4(encoder3_output)
 
         decoder_embedding = tf.nn.embedding_lookup(self.embedding_matrix, decoder_input)
-        decoder_embedding = tf.positional_encoding_decoder(decoder_embedding)
+        decoder_embedding = self.positional_encoding_decoder(decoder_embedding)
 
         decoder1_output = self.decoder1(decoder_embedding, context=encoder4_output)
         decoder2_output = self.decoder2(decoder1_output, context=encoder4_output)
