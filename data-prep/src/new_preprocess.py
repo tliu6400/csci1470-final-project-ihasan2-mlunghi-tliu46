@@ -3,13 +3,11 @@ import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction.text import CountVectorizer
-from style_tags import TFIDFStatsGenerator, RelativeTagsGenerator, TrainDataGeneration
 from tqdm import tqdm
 
 # this function handles the dirty work of the preprocessing
 # Specifying it with a tsv and an output directory, it will populate the output directory with the appropriate information
 def generate(source, dest, style1, style2):
-
     # convert data into a pandas dataframe
     data = pd.read_csv(source, sep="\t")
     # collect all sentences where the style is one of our two desired styles
@@ -19,12 +17,6 @@ def generate(source, dest, style1, style2):
 
 
     print("COMPUTING TF/IDF STATS")
-    # first_tags_style, second_tags_style = generate_tags(first_text_class=style1_subset[style1_subset["split"] != "test"]["txt"],
-    #                                                     second_text_class=style2_subset[style2_subset["split"] != "test"]["txt"], 
-    #                                                     first_tag_class=style1, second_tag_class=style2, 
-    #                                                     ignore_from_tags=None, 
-    #                                                     threshold=0.9, 
-    #                                                     ngram_range=(1,2))
 
     id_to_word_first, word_to_id_first, X_first, word_to_idf_first, word_count_first = stat_list(style1_subset,style1)
     id_to_word_second, word_to_id_second, X_second, word_to_idf_second, word_count_second = stat_list(style2_subset,style2)
@@ -34,10 +26,10 @@ def generate(source, dest, style1, style2):
 
     tags2 = relative_tag_generator(style2, id_to_word_second, word_to_id_second, X_second, word_to_idf_second, word_count_second,
                                     style1, id_to_word_first, word_to_id_first, X_first, word_to_idf_first, word_count_first)
-                              
 
-    
-    
+
+
+
     print("LOADING JSON TAGS")
 
     # write the json files with the relevant tags to the output directory
@@ -47,14 +39,6 @@ def generate(source, dest, style1, style2):
         json.dump(tags2, f)
 
     print("GENERATING TAGGED DATA")
-
-    # print("PENIS HOLE")
-    # print(tags1)
-
-    #NOTE: THESE METHODS CALLED FROM OTHR FILE
-    # TrainDataGeneration(first_style, out_path, first_tags_style, style_0_label, tagged_lang).generate()
-    # TrainDataGeneration(style1_subset, dest, tags1, style1, "tagged").generate()
-    # TrainDataGeneration(style2_subset, dest, tags2, style2, "tagged").generate()
 
     create_datasets(style1_subset, dest, tags1, style1)
     create_datasets(style2_subset, dest, tags2, style2)
@@ -113,13 +97,20 @@ def create_datasets(s, dest, tags, style):
                 tagged_sent.append(sent[i])
                 prev_tag = False
                 i += 1
-        return " ".join(tagged_sent)  
+        return " ".join(tagged_sent)
 
 
     def tag_and_dump(split):
 
         original_sentences, tagged_sentences = [], []
-        data_in = s[s["split"] == split]
+        if split == "train":
+            data_in = s[s["split"]!= "test"]
+        else:
+            data_in = s[s["split"] == split]
+
+
+        print('PENIS', type(data_in))
+
         for _,r in data_in.iterrows():
             original = r['txt'].strip().replace("\n", "")
             original_sentences.append(original)
@@ -130,7 +121,7 @@ def create_datasets(s, dest, tags, style):
         with open(f"{dest}/entagged_parallel.{split}.en.{style}", "w") as original_out,\
              open(f"{dest}/{split}.tagged.{style}", "w") as tagged_out:
 
-            for original, tagged in tqdm(zip(original_sentences, tagged_sentences), total=len(tagged_sentences)):
+            for original, tagged in zip(original_sentences, tagged_sentences):
                 if style in tagged:
                     ### ONLY WRITE OUT THE Tagged DATA
                     original_out.write(f"{original.strip()}\n")
@@ -139,7 +130,6 @@ def create_datasets(s, dest, tags, style):
 
     tag_and_dump(split='train')
     tag_and_dump(split='test')
-    tag_and_dump(split='val')
 
     return
 
@@ -148,7 +138,7 @@ def create_datasets(s, dest, tags, style):
 def stat_list(sentences, style, ngram_range =(1,2)):
 
     # print("inside stat list the creation of word_to_id.keys() \n\n\n\n\n\n\n\n", sentences)
-    
+
     sentences = sentences[sentences["split"]!= "test"]["txt"]
 
     # generate tfidf stats for first style
@@ -165,7 +155,7 @@ def stat_list(sentences, style, ngram_range =(1,2)):
     idf = vectorizer.idf_
     word_to_idf = dict(zip(feature_names, idf))
 
-    #count up instances 
+    #count up instances
     count_vectorizer = CountVectorizer(ngram_range=ngram_range)
     counted = count_vectorizer.fit_transform(sentences)
     fn = count_vectorizer.get_feature_names()
@@ -239,23 +229,11 @@ def relative_tag_generator(style_m, id_to_word_m, word_to_id_m, X_m, word_to_idf
 
 
 
-
-
-def generate_tags(first_text_class, second_text_class, first_tag_class, second_tag_class, threshold, ngram_range, ignore_from_tags=None):
-
-    stats_class_one = TFIDFStatsGenerator(data=first_text_class, data_id=first_tag_class, ngram_range=ngram_range)
-    stats_class_two = TFIDFStatsGenerator(data=second_text_class, data_id=second_tag_class, ngram_range=ngram_range)
-
-    tags_class_one = RelativeTagsGenerator(main_class_stats=stats_class_one, relative_class_stats=stats_class_two, ignore_from_tags=ignore_from_tags, thresh=threshold).tags
-    tags_class_two = RelativeTagsGenerator(main_class_stats=stats_class_two, relative_class_stats=stats_class_one, thresh=threshold).tags
-
-    return tags_class_one, tags_class_two
-
 if __name__ == '__main__':
 
-    
+
     print("Starting Preprocessing!")
-    tsv_path = "../../dataa/politeness.tsv"
+    tsv_path = "../../data/politeness.tsv"
     output_path = "../../data/"
 
     #generate tags
