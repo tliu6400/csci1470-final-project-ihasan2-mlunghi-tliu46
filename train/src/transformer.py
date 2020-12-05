@@ -102,9 +102,19 @@ class Transformer_Block(tf.keras.layers.Layer):
 
         return tf.nn.relu(feed_forward_out)
 
+class Position_Encoding_Layer(tf.keras.layers.Layer):
+
+    def __init__(self, window_sz, emb_sz):
+        super(Position_Encoding_Layer, self).__init__()
+        self.positional_embeddings = self.add_weight("pos_embed", shape=[window_sz, emb_sz])
+
+    @tf.function
+    def call(self, x):
+        return x + self.positional_embeddings
+
 class Transformer(tf.keras.Model):
 
-    def __init__(self, vocab_size):
+    def __init__(self, vocab, reverse_vocab):
         super(Transformer, self).__init__()
 
         self.batch_sz = 128
@@ -112,11 +122,15 @@ class Transformer(tf.keras.Model):
         self.num_heads = 4
         self.emb_sz = 512
         self.hidden_sz = 512
-        self.vocab_sz = vocab_size
+        self.vocab = vocab
+        self.reverse_vocab
         self.optimizer = tf.keras.optimizers.Adam(learning_rate=5e-5)
 
         self.embedding_matrix = tf.Variable(tf.random.normal([self.vocab_sz, self.emb_sz], stddev=.1))
-
+        
+        self.positional_encoding_encoder = transformer.Position_Encoding_Layer(32, self.emb_sz)
+		self.positional_encoding_decoder = transformer.Position_Encoding_Layer(32, self.emb_sz)
+        
         self.encoder1 = Transformer_Block(self.emb_sz, self.hidden_sz, False)
         self.encoder2 = Transformer_Block(self.emb_sz, self.hidden_sz, False)
         self.encoder3 = Transformer_Block(self.emb_sz, self.hidden_sz, False)
@@ -134,6 +148,7 @@ class Transformer(tf.keras.Model):
     @tf.function
     def call(self, encoder_input, decoder_input):
         encoder_embedding = tf.nn.embedding_lookup(self.embedding_matrix, encoder_input)
+        encoder_embedding = tf.positional_encoding_encoder(encoder_embedding)
 
         encoder1_output = self.encoder1(encoder_embedding)
         encoder2_output = self.encoder2(encoder1_output)
@@ -141,6 +156,7 @@ class Transformer(tf.keras.Model):
         encoder4_output = self.encoder4(encoder3_output)
 
         decoder_embedding = tf.nn.embedding_lookup(self.embedding_matrix, decoder_input)
+        decoder_embedding = tf.positional_encoding_decoder(decoder_embedding)
 
         decoder1_output = self.decoder1(decoder_embedding, context=encoder4_output)
         decoder2_output = self.decoder2(decoder1_output, context=encoder4_output)
@@ -153,15 +169,31 @@ class Transformer(tf.keras.Model):
 
         return probs
 
-    def sample(self, sample_input):
-        encoder_embedding = tf.nn.embedding_lookup(self.embedding_matrix, sample_input)
-        encoder1_output = self.encoder1(encoder_embedding)
-        encoder2_output = self.encoder2(encoder1_output)
-        encoder3_output = self.encoder3(encoder2_output)
-        encoder4_output = self.encoder4(encoder3_output)
+    # def sample(self, sample_input):
+    #     encoder_embedding = tf.nn.embedding_lookup(self.embedding_matrix, sample_input)
+    #     encoder1_output = self.encoder1(encoder_embedding)
+    #     encoder2_output = self.encoder2(encoder1_output)
+    #     encoder3_output = self.encoder3(encoder2_output)
+    #     encoder4_output = self.encoder4(encoder3_output)
         
-        # TODO: Sample
-        return
+    #     start_token = self.vocab["*START*"]
+    #     sampled = [start_token]
+    #     while len(sampled < 32) and sampled[-1] is not "*STOP*":
+    #         decoder_embedding = tf.nn.embedding_lookup(self.embedding_matrix, [[sampled[-1]]])
+
+    #         decoder1_output = self.decoder1(decoder_embedding, context=encoder4_output)
+    #         decoder2_output = self.decoder2(decoder1_output, context=encoder4_output)
+    #         decoder3_output = self.decoder3(decoder2_output, context=encoder4_output)
+    #         decoder4_output = self.decoder4(decoder3_output, context=encoder4_output)
+            
+    #         dense1_output = self.dense1(decoder4_output)
+    #         dense2_output = self.dense2(dense1_output)
+    #         probs = self.dense3(dense2_output)
+
+    #         output_token = tf.math.argmax(tf.squeeze(probs))
+    #         sampled.append(output_token)
+
+    #     return sampled
 
     def loss(self, probs, labels, mask):
         probs = tf.boolean_mask(probs, mask)

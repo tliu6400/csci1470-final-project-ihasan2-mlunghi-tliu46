@@ -78,12 +78,12 @@ def main():
     if args.load is not None:
         model = tf.saved_model.load(args.load)
     else:
-        model = Transformer(len(vocab))
+        model = Transformer(vocab, reverse_vocab)
 
-    # # Train model
-    # for i in range(1, 10):
-    #     print("----------Starting training epoch {}----------".format(i))
-    #     train(model, train_inputs, train_labels, padding_index)
+    # Train model
+    for i in range(1, 10):
+        print("----------Starting training epoch {}----------".format(i))
+        train(model, train_inputs, train_labels, padding_index)
 
     # Sample model
     idx = random.choice(range(len(test_inputs)))
