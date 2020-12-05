@@ -46,7 +46,7 @@ def test(model, test_inputs, test_labels, padding_index):
     test_inputs = tf.data.Dataset.from_tensor_slices(test_inputs)
     test_labels = tf.data.Dataset.from_tensor_slices(test_labels)
     test_inputs = test_inputs.batch(model.batch_sz)
-    test_inputs = test_inputs.prefetch(mode.batch_sz)
+    test_inputs = test_inputs.prefetch(model.batch_sz)
     test_labels = test_labels.batch(model.batch_sz)
     test_labels = test_labels.prefetch(model.batch_sz)
 
@@ -84,7 +84,7 @@ def main():
     for i in range(1, 10):
         print("----------Starting training epoch {}----------".format(i))
         train(model, train_inputs, train_labels, padding_index)
-        test(mode, test_inputs, test_labels, padding_index)
+        test(model, test_inputs, test_labels, padding_index)
 
     # Sample model
     idx = random.choice(range(len(test_inputs)))
