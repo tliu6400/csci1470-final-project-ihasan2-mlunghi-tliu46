@@ -1,6 +1,4 @@
 venv/
-env/
-dataa/
-.DS_Store
-
-
+data.tsv
+politeness.tsv
+models/

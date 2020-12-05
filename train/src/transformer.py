@@ -1,5 +1,5 @@
 import numpy as np
-import tensorflow as tf 
+import tensorflow as tf
 
 class Four_Headed_Attention(tf.keras.layers.Layer):
 
@@ -63,7 +63,7 @@ class Four_Headed_Attention(tf.keras.layers.Layer):
 
         mask = tf.convert_to_tensor(value=np.transpose(np.tril(np.ones((window_size_queries,window_size_keys))*np.NINF,-1),(1,0)),dtype=tf.float32)
         atten_mask = tf.tile(tf.reshape(mask,[-1,window_size_queries,window_size_keys]),[tf.shape(input=K)[0],1,1])
-        
+
         matrix = tf.matmul(Q, tf.transpose(K, [0, 2, 1]))
         matrix /= K.get_shape()[2]
 
@@ -76,11 +76,9 @@ class Transformer_Block(tf.keras.layers.Layer):
 
     def __init__(self, emb_sz, hidden_sz, is_decoder):
         super(Transformer_Block, self).__init__()
-        # self.self_attention = tf.keras.layers.MultiHeadAttention(4, emb_sz//4)
         self.self_attention = Four_Headed_Attention(emb_sz, is_decoder)
         self.is_decoder = is_decoder
         if self.is_decoder:
-            # self.self_context_attention = tf.keras.layers.MultiHeadAttention(4, emb_sz//4)
             self.self_context_attention = Four_Headed_Attention(emb_sz, False)
         self.layer_norm = tf.keras.layers.LayerNormalization(axis=-1)
         self.dense1 = tf.keras.layers.Dense(hidden_sz, activation="relu")
@@ -110,13 +108,10 @@ class Transformer(tf.keras.Model):
         super(Transformer, self).__init__()
 
         self.batch_sz = 128
-        # self.batch_sz = 8000
         self.num_layers = 4
         self.num_heads = 4
         self.emb_sz = 512
-        # self.emb_sz = 512
         self.hidden_sz = 512
-        # self.hidden_sz = 512
         self.vocab_sz = vocab_size
         self.optimizer = tf.keras.optimizers.Adam(learning_rate=5e-5)
 
@@ -135,7 +130,7 @@ class Transformer(tf.keras.Model):
         self.dense1 = tf.keras.layers.Dense(self.hidden_sz, activation="relu")
         self.dense2 = tf.keras.layers.Dense(self.hidden_sz, activation="relu")
         self.dense3 = tf.keras.layers.Dense(self.vocab_sz, activation="softmax")
-    
+
     @tf.function
     def call(self, encoder_input, decoder_input):
         encoder_embedding = tf.nn.embedding_lookup(self.embedding_matrix, encoder_input)
@@ -158,8 +153,18 @@ class Transformer(tf.keras.Model):
 
         return probs
 
+    def sample(self, sample_input):
+        encoder_embedding = tf.nn.embedding_lookup(self.embedding_matrix, sample_input)
+        encoder1_output = self.encoder1(encoder_embedding)
+        encoder2_output = self.encoder2(encoder1_output)
+        encoder3_output = self.encoder3(encoder2_output)
+        encoder4_output = self.encoder4(encoder3_output)
+        
+        # TODO: Sample
+        return
+
     def loss(self, probs, labels, mask):
         probs = tf.boolean_mask(probs, mask)
         labels = tf.boolean_mask(labels, mask)
 
-        return tf.reduce_mean(tf.keras.losses.sparse_categorical_crossentropy(labels, probs, from_logits=False))    
+        return tf.reduce_mean(tf.keras.losses.sparse_categorical_crossentropy(labels, probs, from_logits=False))

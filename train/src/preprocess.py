@@ -23,7 +23,8 @@ def build_vocab(train_input_sentences, train_labels_sentences, test_input_senten
     return vocab
 
 def pad_corpus(input_sentences, labels_sentences):
-    max_length = min(32, max([len(s) for s in input_sentences] + [len(s) for s in labels_sentences]) + 1)
+    max_length = 32
+    # max_length = min(32, max([len(s) for s in input_sentences] + [len(s) for s in labels_sentences]) + 1)
     input_padded_sentences = []
     for s in input_sentences:
         padded_input = s[:max_length]
@@ -50,32 +51,14 @@ def get_data(train_inputs_file, train_labels_file, test_inputs_file, test_labels
     train_inputs, train_labels = pad_corpus(train_inputs, train_labels)
     test_inputs, test_labels = pad_corpus(test_inputs, test_labels)
     
-    # Build vocab
+    # Build vocab (word to id) and reverse_vocab (id to word)
     vocab = build_vocab(train_inputs, train_labels, test_inputs, test_labels)
+    reverse_vocab = {v: k for k, v in vocab.items()}
 
     # Convert to ids
     train_inputs = convert_to_id(vocab, train_inputs)
     train_labels = convert_to_id(vocab, train_labels)
     test_inputs = convert_to_id(vocab, test_inputs)
     test_labels = convert_to_id(vocab, test_labels)
-
-    reverse_vocab = {v: k for k, v in vocab.items()}
-
-    train_inputs = tf.data.Dataset.from_tensor_slices(train_inputs)
-    train_labels = tf.data.Dataset.from_tensor_slices(train_labels)
-    test_inputs = tf.data.Dataset.from_tensor_slices(test_inputs)
-    test_labels = tf.data.Dataset.from_tensor_slices(test_labels)
-
-    train_inputs = train_inputs.batch(128)
-    train_inputs = train_inputs.prefetch(128)
-
-    train_labels = train_labels.batch(128)
-    train_labels = train_labels.prefetch(128)
-
-    test_inputs = test_inputs.batch(128)
-    test_inputs = test_inputs.prefetch(128)
-
-    test_labels = test_labels.batch(128)
-    test_labels = test_labels.prefetch(128)
 
     return train_inputs, train_labels, test_inputs, test_labels, vocab, reverse_vocab
