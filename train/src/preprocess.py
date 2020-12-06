@@ -50,7 +50,7 @@ def get_data(train_inputs_file, train_labels_file, test_inputs_file, test_labels
     # Pad sentences
     train_inputs, train_labels = pad_corpus(train_inputs, train_labels)
     test_inputs, test_labels = pad_corpus(test_inputs, test_labels)
-    
+
     # Build vocab (word to id) and reverse_vocab (id to word)
     vocab = build_vocab(train_inputs, train_labels, test_inputs, test_labels)
     reverse_vocab = {v: k for k, v in vocab.items()}

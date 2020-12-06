@@ -6,14 +6,19 @@ class Four_Headed_Attention(tf.keras.layers.Layer):
     def __init__(self, emb_sz, use_mask):
         super(Four_Headed_Attention, self).__init__()
 
+        #hyperparameters
         self.emb_sz = emb_sz
         self.num_heads = 4
         self.head_dim = self.emb_sz // 4
         self.use_mask = use_mask
 
+        #keys matrix
         self.K = [tf.keras.layers.Dense(self.head_dim, kernel_initializer="glorot_uniform") for _ in range(self.num_heads)]
+        #values matrix
         self.V = [tf.keras.layers.Dense(self.head_dim, kernel_initializer="glorot_uniform") for _ in range(self.num_heads)]
+        #queries matrix
         self.Q = [tf.keras.layers.Dense(self.head_dim, kernel_initializer="glorot_uniform") for _ in range(self.num_heads)]
+        #weights
         self.w = tf.keras.layers.Dense(self.emb_sz)
 
         # self.K1 = self.add_weight(shape=[self.emb_sz, self.head_dim], initializer="glorot_uniform")
@@ -33,6 +38,7 @@ class Four_Headed_Attention(tf.keras.layers.Layer):
     @tf.function
     def call(self, inputs_for_keys, inputs_for_values, inputs_for_queries):
         total_attention = []
+        #compute attention for each head
         for i in range(self.num_heads):
             attention = self.__attention_matrix(self.K[i](inputs_for_keys), self.Q[i](inputs_for_queries), self.use_mask)
             total_attention.append(tf.matmul(attention, self.V[i](inputs_for_values)))
@@ -61,6 +67,7 @@ class Four_Headed_Attention(tf.keras.layers.Layer):
         window_size_queries = Q.get_shape()[1]
         window_size_keys = K.get_shape()[1]
 
+        #compute the mask to ensure only the right parts of a sentence are looked at
         mask = tf.convert_to_tensor(value=np.transpose(np.tril(np.ones((window_size_queries,window_size_keys))*np.NINF,-1),(1,0)),dtype=tf.float32)
         atten_mask = tf.tile(tf.reshape(mask,[-1,window_size_queries,window_size_keys]),[tf.shape(input=K)[0],1,1])
 
@@ -69,7 +76,6 @@ class Four_Headed_Attention(tf.keras.layers.Layer):
 
         if use_mask:
             matrix += atten_mask
-
         return tf.nn.softmax(matrix)
 
 class Transformer_Block(tf.keras.layers.Layer):
@@ -120,6 +126,7 @@ class Transformer(tf.keras.Model):
     def __init__(self, vocab, reverse_vocab):
         super(Transformer, self).__init__()
 
+        #hyperparameters
         self.batch_sz = 128
         self.num_layers = 4
         self.num_heads = 4
@@ -130,27 +137,34 @@ class Transformer(tf.keras.Model):
         self.optimizer = tf.keras.optimizers.Adam(learning_rate=5e-5)
         self.vocab_sz = len(vocab)
 
+        #embedding matrices
         self.embedding_matrix = tf.Variable(tf.random.normal([self.vocab_sz, self.emb_sz], stddev=.1))
         self.positional_encoding_encoder = Position_Encoding_Layer(33, self.emb_sz)
         self.positional_encoding_decoder = Position_Encoding_Layer(33, self.emb_sz)
+
+        #encoder layers
         self.encoder1 = Transformer_Block(self.emb_sz, self.hidden_sz, False)
         self.encoder2 = Transformer_Block(self.emb_sz, self.hidden_sz, False)
         self.encoder3 = Transformer_Block(self.emb_sz, self.hidden_sz, False)
         self.encoder4 = Transformer_Block(self.emb_sz, self.hidden_sz, False)
 
+        #decoder layers
         self.decoder1 = Transformer_Block(self.emb_sz, self.hidden_sz, True)
         self.decoder2 = Transformer_Block(self.emb_sz, self.hidden_sz, True)
         self.decoder3 = Transformer_Block(self.emb_sz, self.hidden_sz, True)
         self.decoder4 = Transformer_Block(self.emb_sz, self.hidden_sz, True)
 
+        #dense layers
         self.dense1 = tf.keras.layers.Dense(self.hidden_sz, activation="relu")
         self.dense2 = tf.keras.layers.Dense(self.hidden_sz, activation="relu")
         self.dense3 = tf.keras.layers.Dense(self.vocab_sz, activation="softmax")
 
     @tf.function
     def call(self, encoder_input, decoder_input):
-        print(encoder_input.shape)
-        print(decoder_input.shape)
+        #print(encoder_input.shape)
+        #print(decoder_input.shape)
+
+        #pass input through encoder layers
         encoder_embedding = tf.nn.embedding_lookup(self.embedding_matrix, encoder_input)
         encoder_embedding = self.positional_encoding_encoder(encoder_embedding)
 
@@ -159,6 +173,7 @@ class Transformer(tf.keras.Model):
         encoder3_output = self.encoder3(encoder2_output)
         encoder4_output = self.encoder4(encoder3_output)
 
+        #pass input through decoder layers
         decoder_embedding = tf.nn.embedding_lookup(self.embedding_matrix, decoder_input)
         decoder_embedding = self.positional_encoding_decoder(decoder_embedding)
 
@@ -167,6 +182,7 @@ class Transformer(tf.keras.Model):
         decoder3_output = self.decoder3(decoder2_output, context=encoder4_output)
         decoder4_output = self.decoder4(decoder3_output, context=encoder4_output)
 
+        #pass decoder output through dense layers
         dense1_output = self.dense1(decoder4_output)
         dense2_output = self.dense2(dense1_output)
         probs = self.dense3(dense2_output)
@@ -179,7 +195,7 @@ class Transformer(tf.keras.Model):
     #     encoder2_output = self.encoder2(encoder1_output)
     #     encoder3_output = self.encoder3(encoder2_output)
     #     encoder4_output = self.encoder4(encoder3_output)
-        
+
     #     start_token = self.vocab["*START*"]
     #     sampled = [start_token]
     #     while len(sampled < 32) and sampled[-1] is not "*STOP*":
@@ -189,7 +205,7 @@ class Transformer(tf.keras.Model):
     #         decoder2_output = self.decoder2(decoder1_output, context=encoder4_output)
     #         decoder3_output = self.decoder3(decoder2_output, context=encoder4_output)
     #         decoder4_output = self.decoder4(decoder3_output, context=encoder4_output)
-            
+
     #         dense1_output = self.dense1(decoder4_output)
     #         dense2_output = self.dense2(dense1_output)
     #         probs = self.dense3(dense2_output)
@@ -202,5 +218,5 @@ class Transformer(tf.keras.Model):
     def loss(self, probs, labels, mask):
         probs = tf.boolean_mask(probs, mask)
         labels = tf.boolean_mask(labels, mask)
-
+        #compute sparse categorical cross-entropy loss
         return tf.reduce_mean(tf.keras.losses.sparse_categorical_crossentropy(labels, probs, from_logits=False))
