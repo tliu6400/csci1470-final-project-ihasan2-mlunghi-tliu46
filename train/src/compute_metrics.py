@@ -72,6 +72,17 @@ def main(generated_corpus, generated_sentences, labels_corpus, labels_sentences)
         print("ERROR: UNABLE TO COMPUTE BLUE SCORE")
     print("\n\n\n")
 
+    """
+    General Workflow:
+    1. These functions ar ecalled from trian.py.
+    2. Each of the texts is an array of arrays of strings (sentences) or a just one large string (corpus).
+    3. BLUE and ROUGE scores are computed and printed.
+
+    Resources:
+    ROUGE - https://github.com/pcyin/PyRouge
+    BLUE - https://github.com/neural-dialogue-metrics/BLEU
+    """
+
 # if __name__ == '__main__':
 #
 #     """
