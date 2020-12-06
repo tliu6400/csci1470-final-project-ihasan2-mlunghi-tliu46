@@ -8,7 +8,7 @@ Options:
 """
 # from docopt import docopt
 from PyRouge.pyrouge import Rouge
-# import bleu
+import bleu
 
 def read_data(file_name):
     text = []
@@ -28,15 +28,8 @@ def compute_rouge(generated_data, labels):
 
     generated_data = [generated_data]
     labels = [labels]
-
-    print("my input variables are\n\n ", generated_data[:10],"\n\n\n\n\n\n", labels[:10])
-
-    print("inside the compute_rougue function")
     rouge = Rouge()
-    print("Rouge instance created")
-    print("about to call rouge_l on generated_data, labels")
     [precision, recall, f_score] = rouge.rouge_l(generated_data,labels)
-    print("finished the call to rougue l ")
     return (precision, recall, f_score)
 
 def compute_bleu(generated_data, labels):
@@ -51,35 +44,33 @@ def main(generated_corpus, generated_sentences, labels_corpus, labels_sentences)
 
     #print rouge metrics
     print("ROUGE METRICS\n")
-    precision, recall, f_score = compute_rouge(generated_corpus, labels_corpus)
-    print("Precision: " + str(precision))
-    print("Recall: " + str(recall))
-    print("F_score: " + str(f_score))
+    try:
+        precision, recall, f_score = compute_rouge(generated_corpus, labels_corpus)
+        print("Precision: " + str(precision))
+        print("Recall: " + str(recall))
+        print("F_score: " + str(f_score))
 
-
-    # precision, recall, f_score = compute_rouge(generated_sentences, labels_sentences)
-    # print("Precision: " + precision)
-    # print("Recall: " + recall)
-    # print("F_score: " + f_score)
-    #
-
-
-
-
-
-    print("\n")
-    print("Score Explanation:")
-    print("ROUGE-n recall=40% means that 40% of the n-grams in the reference summary" +
-    "are also present in the generated summary.\nROUGE-n precision=40% means that 40%" +
-    "of the n-grams in the generated summary are also present in the reference summary." +
-    "\nROUGE-n F1-score=40% is more difficult to interpret, like any F1-score.")
+        print("\n")
+        print("Score Explanation:")
+        print("ROUGE-n recall=40% means that 40% of the n-grams in the reference summary" +
+        "are also present in the generated summary.\nROUGE-n precision=40% means that 40%" +
+        "of the n-grams in the generated summary are also present in the reference summary." +
+        "\nROUGE-n F1-score=40% is more difficult to interpret, like any F1-score.")
+    except:
+        print("ERROR: UNABLE TO ROUGE BLUE SCORE")
     print("\n\n\n")
 
     #print blue metrics
-    # print("BLUE METRICS\n")
-    # blue_score = compute_bleu(generated_sentences, labels_sentences)
-    # print("Score: " + blue_score)
-    # print("\n\n\n")
+    print("BLUE METRICS\n")
+    try:
+        blue_score = compute_bleu(generated_corpus, labels_corpus)
+        print("Blue Score: ")
+        print(blue_score.bleu)
+        print("Complete Metrics Rundown: ")
+        print(blue_score)
+    except:
+        print("ERROR: UNABLE TO COMPUTE BLUE SCORE")
+    print("\n\n\n")
 
 # if __name__ == '__main__':
 #

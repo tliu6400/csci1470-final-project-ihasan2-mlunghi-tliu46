@@ -110,6 +110,8 @@ def main():
         output_sentence = [reverse_vocab[output_sentence[j].numpy()] for j in range((len(output_sentence)))]
         collected_outputs.append(output_sentence)
 
+
+    #Computes Rouge metrics
     fluid_generated_sentences = []
     for array in collected_outputs:
         fluid_generated_sentences.append(' '.join(array))
