@@ -8,11 +8,13 @@ unk_token = "*UNK*"
 
 def read_data(file_name):
     text = []
+    #opens and reads data line by line
     with open(file_name, 'r') as data_file:
         for line in data_file: text.append(line.split())
     return text
 
 def build_vocab(train_input_sentences, train_labels_sentences, test_input_sentences, test_labels_sentences):
+    #builds a vocabulary given input and label test and train data
     tokens = []
     for s in train_input_sentences: tokens.extend(s)
     for s in train_labels_sentences: tokens.extend(s)
@@ -23,6 +25,7 @@ def build_vocab(train_input_sentences, train_labels_sentences, test_input_senten
     return vocab
 
 def pad_corpus(input_sentences, labels_sentences):
+    #pads the corpus to ensure the size of each sentence is consistent
     max_length = 32
     # max_length = min(32, max([len(s) for s in input_sentences] + [len(s) for s in labels_sentences]) + 1)
     input_padded_sentences = []
@@ -38,6 +41,7 @@ def pad_corpus(input_sentences, labels_sentences):
     return input_padded_sentences, labels_padded_sentences
 
 def convert_to_id(vocab, sentences):
+    #converts sentences to lists of ids
     return np.stack([[vocab[word] if word in vocab else vocab[unk_token] for word in sentence] for sentence in sentences])
 
 def get_data(train_inputs_file, train_labels_file, test_inputs_file, test_labels_file):

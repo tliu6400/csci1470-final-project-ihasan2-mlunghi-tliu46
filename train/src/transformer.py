@@ -82,6 +82,7 @@ class Transformer_Block(tf.keras.layers.Layer):
 
     def __init__(self, emb_sz, hidden_sz, is_decoder):
         super(Transformer_Block, self).__init__()
+        #intializes the transformer block
         self.self_attention = Four_Headed_Attention(emb_sz, is_decoder)
         self.dropout_self_attention = tf.keras.layers.Dropout(0.3)
         self.is_decoder = is_decoder
@@ -98,13 +99,12 @@ class Transformer_Block(tf.keras.layers.Layer):
         attention_out = self.dropout_self_attention(self.self_attention(inputs, inputs, inputs))
         attention_out += inputs
         attention_normalized = self.layer_norm(attention_out)
-
+        #pass attention through feed_forward layers
         if self.is_decoder:
             assert context is not None, "Decoder blocks require context"
             context_attention_out = self.dropout_context_attention(self.self_context_attention(context, context, attention_normalized))
             context_attention_out += attention_normalized
             attention_normalized = self.layer_norm(context_attention_out)
-
         feed_forward_out = self.dropout_dense(self.dense2(self.dense1(attention_normalized)))
         feed_forward_out += attention_normalized
         feed_forward_out = self.layer_norm(feed_forward_out)
