@@ -8,6 +8,7 @@ from transformer import Transformer
 from preprocess import get_data
 # import compute_metrics
 import matplotlib.pyplot as plt
+import pickle
 
 def train(model, train_inputs, train_labels, padding_index):
     train_inputs = tf.data.Dataset.from_tensor_slices(train_inputs)
@@ -106,6 +107,22 @@ def main():
         train_loss.append(train(model, train_inputs, train_labels, padding_index))
         test_loss.append(test(model, test_inputs, test_labels, padding_index))
 
+
+    # write the train and test loss arrays into a file_name
+
+    with open("train_loss.txt", "wb") as fp:
+        pickle.dump(train_loss, fp)
+    with open("test_loss.txt", "wb") as fp:
+        pickle.dump(test_loss, fp)
+
+
+    # to retrieve this later we will use
+    # with open("test.txt", "rb") as fp:   # Unpickling into object b
+    #     b = pickle.load(fp)
+
+
+
+
     x_tr = range(len(train_loss))
     x_te = range(len(test_loss))
 
@@ -114,7 +131,7 @@ def main():
 
     ax1.scatter(x_tr, train_loss, s=10, c='b', marker='s', label='training loss')
     ax1.scatter(x_te, test_loss, s=10, c='r', marker='o', label='testing loss')
-    plot.legend(loc='upper right');
+    plt.legend(loc='upper right');
 
     plt.show()
 
