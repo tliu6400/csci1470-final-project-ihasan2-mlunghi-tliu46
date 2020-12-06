@@ -26,7 +26,7 @@ def read_data(file_name):
 
 def compute_rouge(generated_data, labels):
     rouge = Rouge()
-    [precision, recall, f_score] = rouge.rouge_l([generated_data], [labels])
+    [precision, recall, f_score] = rouge.rouge_l(generated_data, labels)
     return (precision, recall, f_score)
 
 def compute_bleu(generated_data, labels):
@@ -45,6 +45,18 @@ def main(generated_corpus, generated_sentences, labels_corpus, labels_sentences)
     print("Precision: " + precision)
     print("Recall: " + recall)
     print("F_score: " + f_score)
+
+
+    precision, recall, f_score = compute_rouge(generated_sentences, labels_sentences)
+    print("Precision: " + precision)
+    print("Recall: " + recall)
+    print("F_score: " + f_score)
+
+
+
+
+
+
     print("\n")
     print("Score Explanation:")
     print("ROUGE-n recall=40% means that 40% of the n-grams in the reference summary" +
