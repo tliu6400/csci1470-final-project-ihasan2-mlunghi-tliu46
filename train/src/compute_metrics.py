@@ -54,10 +54,10 @@ def main(generated_corpus, generated_sentences, labels_corpus, labels_sentences)
     print("\n\n\n")
 
     #print blue metrics
-    print("BLUE METRICS\n")
-    blue_score = compute_bleu(generated_sentences, labels_sentences)
-    print("Score: " + blue_score)
-    print("\n\n\n")
+    # print("BLUE METRICS\n")
+    # blue_score = compute_bleu(generated_sentences, labels_sentences)
+    # print("Score: " + blue_score)
+    # print("\n\n\n")
 
 # if __name__ == '__main__':
 #
