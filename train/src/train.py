@@ -102,7 +102,7 @@ def main():
     train_loss, test_loss = [], [0]
 
     # Train model
-    for i in range(1, 2):
+    for i in range(1, 101):
         print("----------Starting training epoch {}----------".format(i))
         train_loss.append(train(model, train_inputs, train_labels, padding_index))
         test_loss.append(test(model, test_inputs, test_labels, padding_index))
