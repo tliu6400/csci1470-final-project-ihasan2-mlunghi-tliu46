@@ -6,6 +6,7 @@ import numpy as np
 import tensorflow as tf
 from transformer import Transformer
 from preprocess import get_data
+import compute_metrics
 
 def train(model, train_inputs, train_labels, padding_index):
     train_inputs = tf.data.Dataset.from_tensor_slices(train_inputs)
@@ -81,7 +82,7 @@ def main():
         model = Transformer(vocab, reverse_vocab)
 
     # Train model
-    for i in range(1, 5):
+    for i in range(1, 1):
         print("----------Starting training epoch {}----------".format(i))
         train(model, train_inputs, train_labels, padding_index)
         test(model, test_inputs, test_labels, padding_index)
@@ -93,6 +94,22 @@ def main():
     probs = model.call(tf.expand_dims(test_inputs[idx], axis=0), tf.expand_dims(test_labels[idx, :-1], axis=0))
     output_sentence = tf.math.argmax(probs[0, :, :], axis=1)
     print("Output sentence: {}".format([reverse_vocab[output_sentence[i].numpy()] for i in range((len(output_sentence)))]))
+
+     collected_outputs, label_sentences = [], []
+     for i,inp in enumerate(test_inputs):
+
+         lab = [reverse_vocab[test_labels[i, i]] for j in range(len(test_labels[idx]))]
+         label_sentences.append(lab)
+         probs = model.call(tf.expand_dims(inp, axis=0), tf.expand_dims(test_labels[i, :-1], axis=0))
+         output_sentence = tf.math.argmax(probs[0, :, :], axis=1)
+         output_sentence = [reverse_vocab[output_sentence[j].numpy()] for j in range((len(output_sentence)))]
+         collected_outputs.append(output.sentence)
+
+     generated_corpus_output = '.\n'.join(collected_outputs)
+     label_corpus = '.\n'.join(label_sentences)
+
+     compute_metrics.main(generated_corpus_output, collected_outputs, label_corpus, label_sentences)
+
 
     # Save model
     if args.save is not None:
