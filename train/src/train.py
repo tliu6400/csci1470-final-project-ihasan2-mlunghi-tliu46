@@ -95,12 +95,17 @@ def main():
     output_sentence = tf.math.argmax(probs[0, :, :], axis=1)
     print("Output sentence: {}".format([reverse_vocab[output_sentence[i].numpy()] for i in range((len(output_sentence)))]))
 
+
+    from random import randint
+
+    start = randint(0,len(test_inputs)-250)
+
     collected_outputs, label_sentences = [], []
-    for i,inp in enumerate(test_inputs):
+    for i in range(start, start+50):
 
         lab = [reverse_vocab[test_labels[i, j]] for j in range(len(test_labels[i]))]
         label_sentences.append(lab)
-        probs = model.call(tf.expand_dims(inp, axis=0), tf.expand_dims(test_labels[i, :-1], axis=0))
+        probs = model.call(tf.expand_dims(test_inputs[i], axis=0), tf.expand_dims(test_labels[i, :-1], axis=0))
         output_sentence = tf.math.argmax(probs[0, :, :], axis=1)
         output_sentence = [reverse_vocab[output_sentence[j].numpy()] for j in range((len(output_sentence)))]
         collected_outputs.append(output_sentence)

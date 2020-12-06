@@ -25,8 +25,18 @@ def read_data(file_name):
     return corpus, sentences
 
 def compute_rouge(generated_data, labels):
+
+    generated_data = [generated_data]
+    labels = [labels]
+
+    print("my input variables are\n\n ", generated_data[:10],"\n\n\n\n\n\n", labels[:10])
+
+    print("inside the compute_rougue function")
     rouge = Rouge()
-    [precision, recall, f_score] = rouge.rouge_l(generated_data, labels)
+    print("Rouge instance created")
+    print("about to call rouge_l on generated_data, labels")
+    [precision, recall, f_score] = rouge.rouge_l(generated_data,labels)
+    print("finished the call to rougue l ")
     return (precision, recall, f_score)
 
 def compute_bleu(generated_data, labels):
@@ -42,9 +52,9 @@ def main(generated_corpus, generated_sentences, labels_corpus, labels_sentences)
     #print rouge metrics
     print("ROUGE METRICS\n")
     precision, recall, f_score = compute_rouge(generated_corpus, labels_corpus)
-    print("Precision: " + precision)
-    print("Recall: " + recall)
-    print("F_score: " + f_score)
+    print("Precision: " + str(precision))
+    print("Recall: " + str(recall))
+    print("F_score: " + str(f_score))
 
 
     # precision, recall, f_score = compute_rouge(generated_sentences, labels_sentences)
