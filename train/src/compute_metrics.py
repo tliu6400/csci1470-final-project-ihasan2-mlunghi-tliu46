@@ -6,7 +6,7 @@ Options:
     --generated_data=<str>                        Path to generated data
     --labels=<str>                         Path to the labels
 """
-from docopt import docopt
+# from docopt import docopt
 from PyRouge.pyrouge import Rouge
 import bleu
 
@@ -59,21 +59,21 @@ def main(generated_corpus, generated_sentences, labels_corpus, labels_sentences)
     print("Score: " + blue_score)
     print("\n\n\n")
 
-if __name__ == '__main__':
-
-    """
-    General Workflow:
-    1. Labels and generated data is read.
-    2. Each of the texts is an array of arrays of strings, which are joined into an array of strings and then into one string.
-    3. BLUE and ROUGE scores are computed and printed.
-
-    Resources:
-    ROUGE - https://github.com/pcyin/PyRouge
-    BLUE - https://github.com/neural-dialogue-metrics/BLEU
-    """
-
-    #pulls passed in file paths
-    args = docopt(__doc__, version="")
-    generated_corpus, generated_sentences = read_data(args["--generated_data"])
-    labels_corpus, labels_sentences = read_data(args["--labels"])
-    main(generated_corpus, generated_sentences, labels_corpus, labels_sentences)
+# if __name__ == '__main__':
+#
+#     """
+#     General Workflow:
+#     1. Labels and generated data is read.
+#     2. Each of the texts is an array of arrays of strings, which are joined into an array of strings and then into one string.
+#     3. BLUE and ROUGE scores are computed and printed.
+#
+#     Resources:
+#     ROUGE - https://github.com/pcyin/PyRouge
+#     BLUE - https://github.com/neural-dialogue-metrics/BLEU
+#     """
+#
+#     #pulls passed in file paths
+#     # args = docopt(__doc__, version="")
+#     generated_corpus, generated_sentences = read_data(args["--generated_data"])
+#     labels_corpus, labels_sentences = read_data(args["--labels"])
+#     main(generated_corpus, generated_sentences, labels_corpus, labels_sentences)

@@ -95,20 +95,20 @@ def main():
     output_sentence = tf.math.argmax(probs[0, :, :], axis=1)
     print("Output sentence: {}".format([reverse_vocab[output_sentence[i].numpy()] for i in range((len(output_sentence)))]))
 
-     collected_outputs, label_sentences = [], []
-     for i,inp in enumerate(test_inputs):
+    collected_outputs, label_sentences = [], []
+    for i,inp in enumerate(test_inputs):
 
-         lab = [reverse_vocab[test_labels[i, i]] for j in range(len(test_labels[idx]))]
-         label_sentences.append(lab)
-         probs = model.call(tf.expand_dims(inp, axis=0), tf.expand_dims(test_labels[i, :-1], axis=0))
-         output_sentence = tf.math.argmax(probs[0, :, :], axis=1)
-         output_sentence = [reverse_vocab[output_sentence[j].numpy()] for j in range((len(output_sentence)))]
-         collected_outputs.append(output.sentence)
+        lab = [reverse_vocab[test_labels[i, i]] for j in range(len(test_labels[idx]))]
+        label_sentences.append(lab)
+        probs = model.call(tf.expand_dims(inp, axis=0), tf.expand_dims(test_labels[i, :-1], axis=0))
+        output_sentence = tf.math.argmax(probs[0, :, :], axis=1)
+        output_sentence = [reverse_vocab[output_sentence[j].numpy()] for j in range((len(output_sentence)))]
+        collected_outputs.append(output.sentence)
 
-     generated_corpus_output = '.\n'.join(collected_outputs)
-     label_corpus = '.\n'.join(label_sentences)
+    generated_corpus_output = '.\n'.join(collected_outputs)
+    label_corpus = '.\n'.join(label_sentences)
 
-     compute_metrics.main(generated_corpus_output, collected_outputs, label_corpus, label_sentences)
+    compute_metrics.main(generated_corpus_output, collected_outputs, label_corpus, label_sentences)
 
 
     # Save model
