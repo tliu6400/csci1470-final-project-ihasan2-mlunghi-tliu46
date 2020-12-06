@@ -47,11 +47,11 @@ def main(generated_corpus, generated_sentences, labels_corpus, labels_sentences)
     print("F_score: " + f_score)
 
 
-    precision, recall, f_score = compute_rouge(generated_sentences, labels_sentences)
-    print("Precision: " + precision)
-    print("Recall: " + recall)
-    print("F_score: " + f_score)
-
+    # precision, recall, f_score = compute_rouge(generated_sentences, labels_sentences)
+    # print("Precision: " + precision)
+    # print("Recall: " + recall)
+    # print("F_score: " + f_score)
+    #
 
 
 
