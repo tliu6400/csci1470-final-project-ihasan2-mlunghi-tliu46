@@ -105,8 +105,16 @@ def main():
         output_sentence = [reverse_vocab[output_sentence[j].numpy()] for j in range((len(output_sentence)))]
         collected_outputs.append(output_sentence)
 
-    generated_corpus_output = '.\n'.join(collected_outputs)
-    label_corpus = '.\n'.join(label_sentences)
+    fluid_generated_sentences = []
+    for array in collected_outputs:
+        fluid_generated_sentences.append(' '.join(array))
+
+    fluid_labels = []
+    for array in label_sentences:
+        fluid_labels.append(' '.join(array))
+
+    generated_corpus_output = '.\n'.join(fluid_generated_sentences)
+    label_corpus = '.\n'.join(fluid_labels)
 
     compute_metrics.main(generated_corpus_output, collected_outputs, label_corpus, label_sentences)
 
