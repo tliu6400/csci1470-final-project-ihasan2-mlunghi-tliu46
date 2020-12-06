@@ -103,7 +103,7 @@ def main():
         probs = model.call(tf.expand_dims(inp, axis=0), tf.expand_dims(test_labels[i, :-1], axis=0))
         output_sentence = tf.math.argmax(probs[0, :, :], axis=1)
         output_sentence = [reverse_vocab[output_sentence[j].numpy()] for j in range((len(output_sentence)))]
-        collected_outputs.append(output.sentence)
+        collected_outputs.append(output_sentence)
 
     generated_corpus_output = '.\n'.join(collected_outputs)
     label_corpus = '.\n'.join(label_sentences)
