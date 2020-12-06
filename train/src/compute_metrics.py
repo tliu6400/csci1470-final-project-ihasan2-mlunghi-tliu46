@@ -8,7 +8,7 @@ Options:
 """
 # from docopt import docopt
 from PyRouge.pyrouge import Rouge
-import bleu
+# import bleu
 
 def read_data(file_name):
     text = []
