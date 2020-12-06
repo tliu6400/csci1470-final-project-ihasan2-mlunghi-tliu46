@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import pickle
 
 def train(model, train_inputs, train_labels, padding_index):
+    #utilizes the Dataset API to efficiently process and batch train data
     train_inputs = tf.data.Dataset.from_tensor_slices(train_inputs)
     train_labels = tf.data.Dataset.from_tensor_slices(train_labels)
     train_inputs = train_inputs.batch(model.batch_sz)
@@ -20,6 +21,7 @@ def train(model, train_inputs, train_labels, padding_index):
 
     loss_over_time = []
 
+    #iterates through data and executes training
     for inputs_batch, labels_batch in zip(train_inputs, train_labels):
         with tf.GradientTape() as tape:
             probs = model.call(inputs_batch, labels_batch[:, :-1])
@@ -54,6 +56,7 @@ def train(model, train_inputs, train_labels, padding_index):
     #     model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
 
 def test(model, test_inputs, test_labels, padding_index):
+    #utilizes the Dataset API to efficiently process and batch test data
     test_inputs = tf.data.Dataset.from_tensor_slices(test_inputs)
     test_labels = tf.data.Dataset.from_tensor_slices(test_labels)
     test_inputs = test_inputs.batch(model.batch_sz)
@@ -63,6 +66,7 @@ def test(model, test_inputs, test_labels, padding_index):
 
     loss_over_time = []
 
+    #computes the loss over the test data
     for inputs_batch, labels_batch in zip(test_inputs, test_labels):
         probs = model.call(inputs_batch, labels_batch[:, :-1])
         loss = model.loss(probs, labels_batch[:, 1:], labels_batch[:, 1:] != padding_index)
@@ -74,17 +78,19 @@ def test(model, test_inputs, test_labels, padding_index):
     return min(loss_over_time)
 
 def main():
+    #parses the arguments passed into the program via the command line
     parser = argparse.ArgumentParser("Train model")
     parser.add_argument("--model", type=str)
     parser.add_argument("--load", type=str)
     parser.add_argument("--save", type=str)
     args = parser.parse_args()
 
+    #error checks the model argument
     if args.model is None or args.model not in {"TAGGER", "GENERATOR"}:
         print("--model parameter must be \"TAGGER\" or \"GENERATOR\"")
         exit()
 
-    # Preprocess
+    #executes the program using the right model
     if args.model == "TAGGER":
         train_inputs, train_labels, test_inputs, test_labels, vocab, reverse_vocab = get_data("../../data/entagged_parallel.train.en.P_0", "../../data/train.tagged.P_0", "../../data/entagged_parallel.test.en.P_0", "../../data/test.tagged.P_0")
     else:
@@ -92,7 +98,7 @@ def main():
 
     padding_index = vocab["*PAD*"]
 
-    # Initialize model
+    #initializes the model
     if args.load is not None:
         model = tf.saved_model.load(args.load)
     else:
@@ -101,15 +107,14 @@ def main():
 
     train_loss, test_loss = [], [0]
 
-    # Train model
+    #trains the model
     for i in range(1, 21):
         print("----------Starting training epoch {}----------".format(i))
         train_loss.append(train(model, train_inputs, train_labels, padding_index))
         test_loss.append(test(model, test_inputs, test_labels, padding_index))
 
 
-    # write the train and test loss arrays into a file_name
-
+    #write the train and test loss arrays into a file_name
     with open("train_loss.txt", "wb") as fp:
         pickle.dump(train_loss, fp)
     with open("test_loss.txt", "wb") as fp:
@@ -142,7 +147,7 @@ def main():
     # plt.show()
 
 
-    # Sample model
+    #sample model
     idx = random.choice(range(len(test_inputs)-1))
     print("Input sentence: {}".format([reverse_vocab[test_inputs[idx, i]] for i in range(len(test_inputs[idx]))]))
     print("Label sentence: {}".format([reverse_vocab[test_labels[idx, i]] for i in range(len(test_labels[idx]))]))
@@ -181,7 +186,7 @@ def main():
     # compute_metrics.main(generated_corpus_output, collected_outputs, label_corpus, label_sentences)
     #
 
-    # Save model
+    #save the model
     if args.save is not None:
         tf.saved_model.save(model, args.save)
 
