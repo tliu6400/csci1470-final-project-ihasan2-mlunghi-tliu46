@@ -98,7 +98,7 @@ def main():
     collected_outputs, label_sentences = [], []
     for i,inp in enumerate(test_inputs):
 
-        lab = [reverse_vocab[test_labels[i, i]] for j in range(len(test_labels[i]))]
+        lab = [reverse_vocab[test_labels[i, j]] for j in range(len(test_labels[i]))]
         label_sentences.append(lab)
         probs = model.call(tf.expand_dims(inp, axis=0), tf.expand_dims(test_labels[i, :-1], axis=0))
         output_sentence = tf.math.argmax(probs[0, :, :], axis=1)
