@@ -122,6 +122,11 @@ def main():
 
 
 
+    # with open("test_loss.txt", "rb") as fp:
+    #     test_loss = pickle.load(fp)
+    #
+    # with open("train_loss.txt", "rb") as fp:
+    #     train_loss = pickle.load(fp)
 
     x_tr = range(len(train_loss))
     x_te = range(len(test_loss))
@@ -129,11 +134,12 @@ def main():
     fig = plt.figure()
     ax1 = fig.add_subplot(111)
 
-    ax1.scatter(x_tr, train_loss, s=10, c='b', marker='s', label='training loss')
-    ax1.scatter(x_te, test_loss, s=10, c='r', marker='o', label='testing loss')
-    plt.legend(loc='upper right');
 
-    plt.show()
+    # ax1.scatter(x_tr, train_loss, s=10, c='b', marker='s', label='training loss')
+    # ax1.scatter(x_te, test_loss, s=10, c='r', marker='o', label='testing loss')
+    # plt.legend(loc='upper right');
+    #
+    # plt.show()
 
 
     # Sample model
