@@ -77,26 +77,29 @@ class Transformer_Block(tf.keras.layers.Layer):
     def __init__(self, emb_sz, hidden_sz, is_decoder):
         super(Transformer_Block, self).__init__()
         self.self_attention = Four_Headed_Attention(emb_sz, is_decoder)
+        self.dropout_self_attention = tf.keras.layers.Dropout(0.3)
         self.is_decoder = is_decoder
         if self.is_decoder:
             self.self_context_attention = Four_Headed_Attention(emb_sz, False)
+            self.dropout_context_attention = tf.keras.layers.Dropout(0.3)
         self.layer_norm = tf.keras.layers.LayerNormalization(axis=-1)
         self.dense1 = tf.keras.layers.Dense(hidden_sz, activation="relu")
         self.dense2 = tf.keras.layers.Dense(emb_sz)
+        self.dropout_dense = tf.keras.layers.Dropout(0.3)
 
     @tf.function
     def call(self, inputs, context=None):
-        attention_out = self.self_attention(inputs, inputs, inputs)
+        attention_out = self.dropout_self_attention(self.self_attention(inputs, inputs, inputs))
         attention_out += inputs
         attention_normalized = self.layer_norm(attention_out)
 
         if self.is_decoder:
             assert context is not None, "Decoder blocks require context"
-            context_attention_out = self.self_context_attention(context, context, attention_normalized)
+            context_attention_out = self.dropout_context_attention(self.self_context_attention(context, context, attention_normalized))
             context_attention_out += attention_normalized
             attention_normalized = self.layer_norm(context_attention_out)
 
-        feed_forward_out = self.dense2(self.dense1(attention_normalized))
+        feed_forward_out = self.dropout_dense(self.dense2(self.dense1(attention_normalized)))
         feed_forward_out += attention_normalized
         feed_forward_out = self.layer_norm(feed_forward_out)
 
