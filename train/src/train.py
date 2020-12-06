@@ -88,7 +88,7 @@ def main():
         test(model, test_inputs, test_labels, padding_index)
 
     # Sample model
-    idx = random.choice(range(len(test_inputs)))
+    idx = random.choice(range(len(test_inputs)-1))
     print("Input sentence: {}".format([reverse_vocab[test_inputs[idx, i]] for i in range(len(test_inputs[idx]))]))
     print("Label sentence: {}".format([reverse_vocab[test_labels[idx, i]] for i in range(len(test_labels[idx]))]))
     probs = model.call(tf.expand_dims(test_inputs[idx], axis=0), tf.expand_dims(test_labels[idx, :-1], axis=0))
@@ -98,7 +98,7 @@ def main():
     collected_outputs, label_sentences = [], []
     for i,inp in enumerate(test_inputs):
 
-        lab = [reverse_vocab[test_labels[i, i]] for j in range(len(test_labels[idx]))]
+        lab = [reverse_vocab[test_labels[i, i]] for j in range(len(test_labels[i]))]
         label_sentences.append(lab)
         probs = model.call(tf.expand_dims(inp, axis=0), tf.expand_dims(test_labels[i, :-1], axis=0))
         output_sentence = tf.math.argmax(probs[0, :, :], axis=1)
