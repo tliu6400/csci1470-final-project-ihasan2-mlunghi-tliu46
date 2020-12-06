@@ -13,9 +13,6 @@ def generate(source, dest, style1, style2):
     # collect all sentences where the style is one of our two desired styles
     style1_subset, style2_subset = data[data["style"] == style1], data[data["style"] == style2]
 
-    # print("\n\n\n", style2_subset, "Penus")
-
-
     print("COMPUTING TF/IDF STATS")
 
     id_to_word_first, word_to_id_first, X_first, word_to_idf_first, word_count_first = stat_list(style1_subset,style1)
@@ -108,9 +105,6 @@ def create_datasets(s, dest, tags, style):
         else:
             data_in = s[s["split"] == split]
 
-
-        print('PENIS', type(data_in))
-
         for _,r in data_in.iterrows():
             original = r['txt'].strip().replace("\n", "")
             original_sentences.append(original)
@@ -171,12 +165,8 @@ def stat_list(sentences, style, ngram_range =(1,2)):
 def relative_tag_generator(style_m, id_to_word_m, word_to_id_m, X_m, word_to_idf_m, word_count_m,
                             style_r, id_to_word_r, word_to_id_r, X_r, word_to_idf_r, word_count_r):
     report = []
-        # print('\n\n\n\ntest1')
-
-    # print(word_to_id_m.keys())
 
     for word in word_to_id_m.keys():
-        # print('\n\n\n\ntest2')
         if word_count_m[word] >= 2 and word in word_to_id_r:
                 # print('\n\n\n\ntest3')
                 res = {}
@@ -184,8 +174,7 @@ def relative_tag_generator(style_m, id_to_word_m, word_to_id_m, X_m, word_to_idf
                 res["freq"] = word_count_m[word]
                 res[f"{style_m}_mean_tfidf"] = X_m[word_to_id_m[word]]
 
-                # print('\n\n\n\ntest')
-                # print(f"{style_m}_mean_tfidf")
+
 
                 res[f"{style_r}_mean_tfidf"] = X_r[word_to_id_r[word]]
                 res[f"{style_m}_idf"] = word_to_idf_m[word]
