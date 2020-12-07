@@ -75,7 +75,7 @@ def test(model, test_inputs, test_labels, padding_index):
 
         print("Test Loss {}".format(loss.numpy()))
 
-    return min(loss_over_time)
+    return max(loss_over_time)
 
 def main():
     #parses the arguments passed into the program via the command line
@@ -94,7 +94,7 @@ def main():
     if args.model == "TAGGER":
         train_inputs, train_labels, test_inputs, test_labels, vocab, reverse_vocab = get_data("../../data/entagged_parallel.train.en.P_0", "../../data/train.tagged.P_0", "../../data/entagged_parallel.test.en.P_0", "../../data/test.tagged.P_0")
     else:
-        train_inputs, train_labels, test_inputs, test_labels, vocab, reverse_vocab = get_data("../../data/train.tagged.P_9", "../../data/entagged_parallel.train.en.P_9", "../../data/entagged_parallel.test.en.P_9", "../../data/test.tagged.P_9")
+        train_inputs, train_labels, test_inputs, test_labels, vocab, reverse_vocab = get_data("../../data/train.tagged.P_9", "../../data/entagged_parallel.train.en.P_9" "../../data/test.tagged.P_9", "../../data/entagged_parallel.test.en.P_9",)
 
     padding_index = vocab["*PAD*"]
 
@@ -108,17 +108,17 @@ def main():
     train_loss, test_loss = [], [0]
 
     #trains the model
-    for i in range(1, 21):
+    for i in range(1, 1):
         print("----------Starting training epoch {}----------".format(i))
         train_loss.append(train(model, train_inputs, train_labels, padding_index))
         test_loss.append(test(model, test_inputs, test_labels, padding_index))
 
 
     #write the train and test loss arrays into a file_name
-    with open("train_loss.txt", "wb") as fp:
-        pickle.dump(train_loss, fp)
-    with open("test_loss.txt", "wb") as fp:
-        pickle.dump(test_loss, fp)
+    # with open("train_loss.txt", "wb") as fp:
+    #     pickle.dump(train_loss, fp)
+    # with open("test_loss.txt", "wb") as fp:
+    #     pickle.dump(test_loss, fp)
 
 
     # to retrieve this later we will use
@@ -127,24 +127,29 @@ def main():
 
 
 
-    # with open("test_loss.txt", "rb") as fp:
-    #     test_loss = pickle.load(fp)
-    #
-    # with open("train_loss.txt", "rb") as fp:
-    #     train_loss = pickle.load(fp)
+    with open("generator_test_loss.txt", "rb") as fp:
+        test_loss = pickle.load(fp)
+
+    test_loss = test_loss[1:]
+
+    with open("generator_train_loss.txt", "rb") as fp:
+        train_loss = pickle.load(fp)
 
     x_tr = range(len(train_loss))
     x_te = range(len(test_loss))
 
     fig = plt.figure()
     ax1 = fig.add_subplot(111)
+    plt.title("Maximal loss across Epochs of Training GENERATOR Model")
+    plt.xlabel("Epoch #")
+    plt.ylabel("Maximal Average Loss")
 
 
-    # ax1.scatter(x_tr, train_loss, s=10, c='b', marker='s', label='training loss')
-    # ax1.scatter(x_te, test_loss, s=10, c='r', marker='o', label='testing loss')
-    # plt.legend(loc='upper right');
-    #
-    # plt.show()
+    ax1.scatter(x_tr, train_loss, s=10, c='b', marker='s', label='training loss')
+    ax1.scatter(x_te, test_loss, s=10, c='r', marker='o', label='testing loss')
+    plt.legend(loc='upper right');
+
+    plt.show()
 
 
     #sample model
