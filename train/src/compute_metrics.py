@@ -1,8 +1,6 @@
 from PyRouge.pyrouge import Rouge
 from bleu import list_bleu
-import ssl
 
-ssl._create_default_https_context = ssl._create_unverified_context
 """
 General Workflow:
 1. These functions ar ecalled from trian.py.
