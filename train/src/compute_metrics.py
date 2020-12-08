@@ -1,6 +1,8 @@
 from PyRouge.pyrouge import Rouge
-import bleu
+from bleu import list_bleu
+import ssl
 
+ssl._create_default_https_context = ssl._create_unverified_context
 """
 General Workflow:
 1. These functions ar ecalled from trian.py.
@@ -34,10 +36,17 @@ def compute_rouge(generated_data, labels):
     [precision, recall, f_score] = rouge.rouge_l(generated_data,labels)
     return (precision, recall, f_score)
 
-def compute_bleu(generated_data, labels):
+def compute_bleu(ref, hyp):
 
     # Note: this is computed at the sentence level
-    score = bleu.bleu_sentence_level(generated_data, labels)
+
+    new_ref = []
+    new_hyp = []
+    for r in ref:
+        new_ref.append(' '.join(r))
+    for r in hyp:
+        new_hyp.append(' '.join(r))
+    score = list_bleu([new_ref], new_hyp)
     return score
 
 def main(generated_corpus, generated_sentences, labels_corpus, labels_sentences):
@@ -64,12 +73,12 @@ def main(generated_corpus, generated_sentences, labels_corpus, labels_sentences)
 
     #print blue metrics
     print("BLUE METRICS\n")
+
     try:
-        blue_score = compute_bleu(generated_corpus, labels_corpus)
+        score = compute_bleu(labels_sentences, generated_sentences)
+
         print("Blue Score: ")
-        print(blue_score.bleu)
-        print("Complete Metrics Rundown: ")
-        print(blue_score)
+        print(score)
     except:
         print("ERROR: UNABLE TO COMPUTE BLUE SCORE")
     print("\n\n\n")

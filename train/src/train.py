@@ -6,7 +6,7 @@ import numpy as np
 import tensorflow as tf
 from transformer import Transformer
 from preprocess import get_data
-# import compute_metrics
+import compute_metrics
 import matplotlib.pyplot as plt
 import pickle
 
@@ -108,7 +108,7 @@ def main():
     train_loss, test_loss = [], [0]
 
     #trains the model
-    for i in range(1, 21):
+    for i in range(1, 1):
         print("----------Starting training epoch {}----------".format(i))
         train_loss.append(train(model, train_inputs, train_labels, padding_index))
         test_loss.append(test(model, test_inputs, test_labels, padding_index))
@@ -156,35 +156,35 @@ def main():
     print("Output sentence: {}".format([reverse_vocab[output_sentence[i].numpy()] for i in range((len(output_sentence)))]))
 
 
-    # from random import randint
-    #
-    # start = randint(0,len(test_inputs)-250)
-    #
-    # collected_outputs, label_sentences = [], []
-    # for i in range(start, start+50):
-    #
-    #     lab = [reverse_vocab[test_labels[i, j]] for j in range(len(test_labels[i]))]
-    #     label_sentences.append(lab)
-    #     probs = model.call(tf.expand_dims(test_inputs[i], axis=0), tf.expand_dims(test_labels[i, :-1], axis=0))
-    #     output_sentence = tf.math.argmax(probs[0, :, :], axis=1)
-    #     output_sentence = [reverse_vocab[output_sentence[j].numpy()] for j in range((len(output_sentence)))]
-    #     collected_outputs.append(output_sentence)
-    #
-    #
-    # #Computes Rouge metrics
-    # fluid_generated_sentences = []
-    # for array in collected_outputs:
-    #     fluid_generated_sentences.append(' '.join(array))
-    #
-    # fluid_labels = []
-    # for array in label_sentences:
-    #     fluid_labels.append(' '.join(array))
-    #
-    # generated_corpus_output = '.\n'.join(fluid_generated_sentences)
-    # label_corpus = '.\n'.join(fluid_labels)
+    from random import randint
 
-    # compute_metrics.main(generated_corpus_output, collected_outputs, label_corpus, label_sentences)
-    #
+    start = randint(0,len(test_inputs)-250)
+
+    collected_outputs, label_sentences = [], []
+    for i in range(start, start+50):
+
+        lab = [reverse_vocab[test_labels[i, j]] for j in range(len(test_labels[i]))]
+        label_sentences.append(lab)
+        probs = model.call(tf.expand_dims(test_inputs[i], axis=0), tf.expand_dims(test_labels[i, :-1], axis=0))
+        output_sentence = tf.math.argmax(probs[0, :, :], axis=1)
+        output_sentence = [reverse_vocab[output_sentence[j].numpy()] for j in range((len(output_sentence)))]
+        collected_outputs.append(output_sentence)
+
+
+    #Computes Rouge metrics
+    fluid_generated_sentences = []
+    for array in collected_outputs:
+        fluid_generated_sentences.append(' '.join(array))
+
+    fluid_labels = []
+    for array in label_sentences:
+        fluid_labels.append(' '.join(array))
+
+    generated_corpus_output = '.\n'.join(fluid_generated_sentences)
+    label_corpus = '.\n'.join(fluid_labels)
+
+    compute_metrics.main(generated_corpus_output, collected_outputs, label_corpus, label_sentences)
+
 
     #save the model
     if args.save is not None:
