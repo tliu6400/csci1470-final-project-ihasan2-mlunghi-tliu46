@@ -80,7 +80,7 @@ def main():
 
     # Train the model
     train_loss, test_loss = [], []
-    for i in range(1, 1):
+    for i in range(1, 5):
         print("----------Starting training epoch {}----------".format(i))
         train_loss.append(train(model, train_inputs, train_labels, padding_index))
         test_loss.append(test(model, test_inputs, test_labels, padding_index))
