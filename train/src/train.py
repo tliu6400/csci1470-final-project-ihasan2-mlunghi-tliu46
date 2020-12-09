@@ -57,7 +57,6 @@ def main():
     parser.add_argument("--model", type=str)
     parser.add_argument("--load", type=str)
     parser.add_argument("--save", type=str)
-    parser.add_argument("--visualize", type=bool)
     args = parser.parse_args()
 
     # Error checks --model argument
@@ -86,33 +85,33 @@ def main():
         train_loss.append(train(model, train_inputs, train_labels, padding_index))
         test_loss.append(test(model, test_inputs, test_labels, padding_index))
 
-    # Visualize train and test loss of model
-    if args.visualize:
-        previous_train_loss = []
-        previous_test_loss = []
-        if args.load is not None:
-            with open("../../evaluation/loss_files/" + args.model + "_train_loss.pickle", "rb") as fp:
-                previous_train_loss = pickle.load(fp)
-            with open("../../evaluation/loss_files/" + args.model + "_test_loss.pickle", "rb") as fp:
-                previous_test_loss = pickle.load(fp)
-        train_loss = previous_train_loss + train_loss
-        test_loss = previous_test_loss + test_loss
-        with open("../../evaluation/loss_files/" + args.model + "_train_loss.pickle", "wb") as fp:
-            pickle.dump(train_loss, fp)
-        with open("../../evaluation/loss_files/" + args.model + "_test_loss.pickle", "wb") as fp:
-            pickle.dump(test_loss, fp)
+    # Save loss information
+    previous_train_loss = []
+    previous_test_loss = []
+    if args.load is not None:
+        with open("../../evaluation/loss_files/" + args.model + "_train_loss.pickle", "rb") as fp:
+            previous_train_loss = pickle.load(fp)
+        with open("../../evaluation/loss_files/" + args.model + "_test_loss.pickle", "rb") as fp:
+            previous_test_loss = pickle.load(fp)
+    train_loss = previous_train_loss + train_loss
+    test_loss = previous_test_loss + test_loss
+    with open("../../evaluation/loss_files/" + args.model + "_train_loss.pickle", "wb") as fp:
+        pickle.dump(train_loss, fp)
+    with open("../../evaluation/loss_files/" + args.model + "_test_loss.pickle", "wb") as fp:
+        pickle.dump(test_loss, fp)
 
-        x_tr = range(len(train_loss))
-        x_te = range(len(test_loss))
-        fig = plt.figure()
-        ax1 = fig.add_subplot(111)
-        plt.title("Maximal loss across Epochs of Training GENERATOR Model")
-        plt.xlabel("Epoch #")
-        plt.ylabel("Mean Loss per Epoch")
-        ax1.scatter(x_tr, train_loss, s=10, c='b', marker='s', label='training loss')
-        ax1.scatter(x_te, test_loss, s=10, c='r', marker='o', label='testing loss')
-        plt.legend(loc='upper right');
-        plt.show()
+    # Visualize train and test loss of model
+    x_tr = range(len(train_loss))
+    x_te = range(len(test_loss))
+    fig = plt.figure()
+    ax1 = fig.add_subplot(111)
+    plt.title("Maximal loss across Epochs of Training GENERATOR Model")
+    plt.xlabel("Epoch #")
+    plt.ylabel("Mean Loss per Epoch")
+    ax1.scatter(x_tr, train_loss, s=10, c='b', marker='s', label='training loss')
+    ax1.scatter(x_te, test_loss, s=10, c='r', marker='o', label='testing loss')
+    plt.legend(loc='upper right');
+    plt.show()
 
     # Sample model
     idx = random.choice(range(len(test_inputs)-1))

@@ -16,18 +16,16 @@ def read_data(file_name):
     text = []
     with open(file_name, 'r') as data_file:
         for line in data_file: text.append(line.split())
-    #text is now an array of arrays of strings
+    # text is now an array of arrays of strings
     sentences = []
     for array in text:
         sentences.append(' '.join(array))
-    #new_text is now an array of strings
-    #formatted_text is one giant string
+    # new_text is now an array of strings
+    # formatted_text is one giant string
     corpus = '.\n'.join(new_text)
-    #returns corpus and arrays of strings
     return corpus, sentences
 
 def compute_rouge(generated_data, labels):
-
     generated_data = [generated_data]
     labels = [labels]
     rouge = Rouge()
@@ -35,9 +33,7 @@ def compute_rouge(generated_data, labels):
     return (precision, recall, f_score)
 
 def compute_bleu(ref, hyp):
-
     # Note: this is computed at the sentence level
-
     new_ref = []
     new_hyp = []
     for r in ref:
@@ -50,8 +46,7 @@ def compute_bleu(ref, hyp):
 def main(generated_corpus, generated_sentences, labels_corpus, labels_sentences):
     print("COMPUTING METRICS...")
     print("\n\n\n")
-
-    #print rouge metrics
+    # Print rouge metrics
     print("ROUGE METRICS\n")
     try:
         precision, recall, f_score = compute_rouge(generated_corpus, labels_corpus)
@@ -68,13 +63,10 @@ def main(generated_corpus, generated_sentences, labels_corpus, labels_sentences)
     except:
         print("ERROR: UNABLE TO ROUGE BLUE SCORE")
     print("\n\n\n")
-
-    #print blue metrics
+    # Print blue metrics
     print("BLUE METRICS\n")
-
     try:
         score = compute_bleu(labels_sentences, generated_sentences)
-
         print("Blue Score: ")
         print(score)
     except:
