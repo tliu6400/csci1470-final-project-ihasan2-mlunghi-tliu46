@@ -94,7 +94,7 @@ def main():
     if args.model == "TAGGER":
         train_inputs, train_labels, test_inputs, test_labels, vocab, reverse_vocab = get_data("../../data/entagged_parallel.train.en.P_0", "../../data/train.tagged.P_0", "../../data/entagged_parallel.test.en.P_0", "../../data/test.tagged.P_0")
     else:
-        train_inputs, train_labels, test_inputs, test_labels, vocab, reverse_vocab = get_data("../../data/train.tagged.P_9", "../../data/entagged_parallel.train.en.P_9" "../../data/test.tagged.P_9", "../../data/entagged_parallel.test.en.P_9",)
+        train_inputs, train_labels, test_inputs, test_labels, vocab, reverse_vocab = get_data("../../data/train.tagged.P_9", "../../data/entagged_parallel.train.en.P_9", "../../data/test.tagged.P_9", "../../data/entagged_parallel.test.en.P_9")
 
     padding_index = vocab["*PAD*"]
 
@@ -142,7 +142,7 @@ def main():
     ax1 = fig.add_subplot(111)
     plt.title("Maximal loss across Epochs of Training GENERATOR Model")
     plt.xlabel("Epoch #")
-    plt.ylabel("Maximal Average Loss")
+    plt.ylabel("Mean Loss per Epoch")
 
 
     ax1.scatter(x_tr, train_loss, s=10, c='b', marker='s', label='training loss')
@@ -160,10 +160,7 @@ def main():
     output_sentence = tf.math.argmax(probs[0, :, :], axis=1)
     print("Output sentence: {}".format([reverse_vocab[output_sentence[i].numpy()] for i in range((len(output_sentence)))]))
 
-
-    from random import randint
-
-    start = randint(0,len(test_inputs)-250)
+    start = random.randint(0,len(test_inputs)-250)
 
     collected_outputs, label_sentences = [], []
     for i in range(start, start+50):
