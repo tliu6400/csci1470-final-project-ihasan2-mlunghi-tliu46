@@ -1,0 +1,7 @@
+Tagger Metrics
+1. ROUGE Score: 0.70
+2. BLEU Score: 34.94
+
+Generator Metrics
+1. ROUGE Score: 0.66
+2. BLEU Score: 23.23
